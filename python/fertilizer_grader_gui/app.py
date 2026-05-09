@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import csv
+import json
 import re
 import sys
 from pathlib import Path
 
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QCloseEvent
 from PySide6.QtWidgets import (
+    QAbstractItemView,
     QApplication,
     QFileDialog,
     QGridLayout,
@@ -28,6 +31,9 @@ from PySide6.QtWidgets import (
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+GUI_DIR = Path(__file__).resolve().parent
+STATE_DIR = GUI_DIR / ".gui-state"
+STATE_PATH = STATE_DIR / "state.json"
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "grading-results"
 REFERENCE_FERTILIZER_COLUMN = "Fertilizer Name"
 MODEL_FERTILIZER_COLUMN = "model_fertilizer"
@@ -113,7 +119,7 @@ def read_csv_rows(path: Path) -> tuple[list[str], list[dict[str, str]]]:
         reader = csv.DictReader(csv_file)
         if reader.fieldnames is None:
             raise ValueError(f"{path} does not contain a header row.")
-        return reader.fieldnames, list(reader)
+        return list(reader.fieldnames), list(reader)
 
 
 def write_csv_rows(path: Path, fieldnames: list[str], rows: list[dict[str, str]]) -> None:
@@ -129,15 +135,36 @@ def safe_name(value: str) -> str:
     return cleaned.strip("-") or "grader"
 
 
+def read_gui_state() -> dict[str, str]:
+    if not STATE_PATH.exists():
+        return {}
+
+    try:
+        with STATE_PATH.open(encoding="utf-8") as state_file:
+            state = json.load(state_file)
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+    if not isinstance(state, dict):
+        return {}
+    return {str(key): str(value) for key, value in state.items()}
+
+
+def write_gui_state(state: dict[str, str]) -> None:
+    STATE_DIR.mkdir(parents=True, exist_ok=True)
+    with STATE_PATH.open("w", encoding="utf-8") as state_file:
+        json.dump(state, state_file, indent=2)
+
+
 class KeyValueTable(QTableWidget):
     def __init__(self) -> None:
         super().__init__(0, 2)
         self.setHorizontalHeaderLabels(["Field", "Value"])
-        self.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        self.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        self.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        self.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         self.verticalHeader().setVisible(False)
         self.setWordWrap(True)
-        self.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
 
     def set_mapping(self, values: dict[str, str], fields: list[str] | None = None) -> None:
         names = fields or list(values.keys())
@@ -202,7 +229,7 @@ class GraderWindow(QMainWindow):
         top.addWidget(load_button, 3, 3, 1, 2)
         layout.addLayout(top)
 
-        splitter = QSplitter(Qt.Horizontal)
+        splitter = QSplitter(Qt.Orientation.Horizontal)
         self.model_table = KeyValueTable()
         self.reference_table = KeyValueTable()
         self.reasoning_view = QTextEdit()
@@ -229,6 +256,7 @@ class GraderWindow(QMainWindow):
         self.grading_layout.addWidget(self.review_table)
         self.grading_layout.addLayout(self.confirm_row)
         layout.addWidget(self.grading_box)
+        self.load_gui_state()
 
     def wrap(self, title: str, widget: QWidget) -> QGroupBox:
         box = QGroupBox(title)
@@ -251,11 +279,48 @@ class GraderWindow(QMainWindow):
         if path:
             self.reference_input.setText(path)
 
+    def load_gui_state(self) -> None:
+        state = read_gui_state()
+        self.grader_input.setText(safe_name(state.get("grader", "")) if state.get("grader") else "")
+        self.output_input.setText(state.get("output_dir", str(DEFAULT_OUTPUT_DIR)))
+        self.model_input.setText(state.get("model_csv", ""))
+        self.reference_input.setText(state.get("reference_csv", ""))
+
+        width = state.get("window_width", "")
+        height = state.get("window_height", "")
+        x_position = state.get("window_x", "")
+        y_position = state.get("window_y", "")
+        if width.isdigit() and height.isdigit():
+            self.resize(int(width), int(height))
+        if x_position.lstrip("-").isdigit() and y_position.lstrip("-").isdigit():
+            self.move(int(x_position), int(y_position))
+
+    def save_gui_state(self) -> None:
+        write_gui_state(
+            {
+                "grader": safe_name(self.grader_input.text()) if self.grader_input.text().strip() else "",
+                "output_dir": self.output_input.text(),
+                "model_csv": self.model_input.text(),
+                "reference_csv": self.reference_input.text(),
+                "window_width": str(self.width()),
+                "window_height": str(self.height()),
+                "window_x": str(self.x()),
+                "window_y": str(self.y()),
+            }
+        )
+
+    def closeEvent(self, event: QCloseEvent) -> None:
+        self.grader_input.setText(safe_name(self.grader_input.text()) if self.grader_input.text().strip() else "")
+        self.save_gui_state()
+        super().closeEvent(event)
+
     def load_session(self) -> None:
         try:
             grader = safe_name(self.grader_input.text())
             if not self.grader_input.text().strip():
                 raise ValueError("Enter a grader name before loading a session.")
+            self.grader_input.setText(grader)
+            self.save_gui_state()
             self.model_path = Path(self.model_input.text())
             self.reference_path = Path(self.reference_input.text())
             if not self.model_path.is_file():
@@ -282,7 +347,7 @@ class GraderWindow(QMainWindow):
                         "Resume grading?",
                         f"Found {len(existing_rows)} completed rows in {self.output_path.name}. Resume from the next item?",
                     )
-                    if answer == QMessageBox.Yes:
+                    if answer == QMessageBox.StandardButton.Yes:
                         self.completed_rows = existing_rows
 
             completed_keys = {self.row_key(row) for row in self.completed_rows}
@@ -394,7 +459,7 @@ class GraderWindow(QMainWindow):
         self.review_table.set_mapping(self.current_grades, [rubric[0] for rubric in RUBRICS])
         self.review_table.show()
 
-        for index, (column, title, _options) in enumerate(RUBRICS):
+        for index, (_column, title, _options) in enumerate(RUBRICS):
             button = QPushButton(f"Edit {title}")
             button.clicked.connect(lambda _checked=False, rubric_index=index: self.edit_rubric(rubric_index))
             self.confirm_row.addWidget(button)
@@ -409,7 +474,8 @@ class GraderWindow(QMainWindow):
         self.show_rubric_prompt()
 
     def confirm_current_item(self) -> None:
-        if self.output_path is None:
+        output_path = self.output_path
+        if output_path is None:
             return
         model_row = self.model_rows[self.current_index]
         reference_row = self.reference_rows_by_key[self.row_key(model_row)]
@@ -433,7 +499,7 @@ class GraderWindow(QMainWindow):
             "reference_fertilizer",
             "model_fertilizer",
         ] + [rubric[0] for rubric in RUBRICS]
-        write_csv_rows(self.output_path, output_fields, self.completed_rows)
+        write_csv_rows(output_path, output_fields, self.completed_rows)
         self.current_index += 1
         self.show_current_item()
 

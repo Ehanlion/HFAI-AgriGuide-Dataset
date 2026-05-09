@@ -4,3 +4,4 @@
 AGENTS.md
 __pycache__/
 *.pyc
+python/fertilizer_grader_gui/.gui-state/
