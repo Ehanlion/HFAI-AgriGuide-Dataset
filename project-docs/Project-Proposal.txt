@@ -1,0 +1,192 @@
+﻿Overview
+Team members’ full names
+* Ethan Owen
+* Rachel Sarmiento
+	What is the name of your benchmark? Provide a short description
+AgriGuide – A benchmark for evaluating how AI systems support human decision-making in agricultural fertilization selection. The benchmark focuses on the human factors of uncertainty communication, reasoning transparency, and safety in AI-generated recommendations based on soil and environmental conditions
+	
+
+Scientific Workflow Context
+Which scientific area does your benchmark focus on?
+Agriculture, Fertilizer, and Farming
+	
+
+Which task in scientific discovery? Describe the context, sources, and inquiry.
+Context: Farmers and agricultural decision-makers analyze soil properties to decide on an optimal fertilizer to apply based on crop type, soil type, environmental conditions, and soil nutrient levels.
+
+
+Sources: We will use the kaifahmad/Fertilizer-Prediction dataset from Hugging Face as the primary dataset. This dataset contains 99 rows and includes temperature, humidity, moisture, soil type, crop type, nitrogen, potassium, phosphorus, and fertilizer name. We may also consider similar datasets on Kaggle. We will provide USDA and FAO recommendations and rules to the AI as well.
+
+
+Inquiry: Given crop, soil, and nutrient conditions, can an AI system recommend a fertilizer in a way that is useful and safe for human decision-making?
+	
+
+Why does this task matter? Describe the significance of this task in the real world.
+Fertilizer recommendations directly affect crop health, yield, cost, and environmental impact. A poor fertilizer recommendation can waste resources or harm crops, while an overconfident recommendation may cause a user to trust the AI without sufficient verification. This makes fertilizer suggestion a strong AI-for-agriculture task with clear human decision consequences.
+	
+
+Which human factor is evaluated? Define this human factor in the context of the scientific discovery task of interest.
+The human factor we evaluate is decision-support quality in fertilizer recommendation, especially:
+1. whether the AI gives recommendations that are interpretable,
+2. whether it communicates uncertainty appropriately, and
+3. whether it avoids overconfident or misleading suggestions.
+
+
+In this context, the benchmark is not only checking whether the fertilizer name matches the label, but whether the AI output would help a human make a responsible agricultural decision.
+	
+
+
+
+Benchmark and AI for Scientific Workflow
+What are previous benchmarks for this task? 
+The existing dataset itself, kaifahmad/Fertilizer-Prediction, supports fertilizer prediction as a tabular classification problem, but it does not evaluate human factors such as interpretability, uncertainty communication, or overreliance. Additional Kaggle datasets also evaluate accuracy and lack human factors of trust.
+	
+
+How is AI used in this task? Describe and cite relevant state-of-the-art models or systems.
+AI can be used here as a recommendation system that takes structured farm-condition inputs and outputs a fertilizer recommendation. In practice, this can be implemented either as a traditional tabular classifier or as an LLM-based advisory system that explains the recommendation in natural language. For this benchmark, we focus on the evaluation design rather than a specific deployed commercial model. As many turn to the most convenient options for initial, speedy queries, we will use readily available LLMs like ChatGPT and Gemini.
+	
+
+What is the input and output of this model? Describe them with a data type (e.g., protein-protein interaction (text), protein structure (image).
+Input:
+* Temperature (numeric)
+* Humidity (numeric)
+* Moisture (numeric)
+* Soil Type (categorical text)
+* Crop Type (categorical text)
+* Nitrogen (numeric)
+* Potassium (numeric)
+* Phosphorous (numeric)
+Output:
+* Fertilizer Name (categorical text)
+* Explanation / confidence statement (text)
+	
+
+What types of failures is the benchmark trying to detect?
+Failure Types
+* Recommending the wrong fertilizer
+* Giving a correct fertilizer label with no useful explanation
+* Giving an overconfident recommendation when the case is ambiguous
+* Giving a recommendation that ignores important nutrient or soil conditions
+* Producing a convincing answer that may lead a human to over-trust the system
+	
+
+How do human evaluations differ from benchmark metrics? Describe scenario, benchmark evaluation, and human evaluation. 
+Scenario: a user wants fertilizer advice for a crop under certain soil and nutrient conditions.
+
+
+Benchmark evaluation: whether the model predicts the labeled fertilizer correctly.
+
+
+Human evaluation: whether the recommendation is understandable, appropriately cautious, and useful for a human making a real agricultural decision.
+This matters because a model may get the label right while still giving poor decision support, which is the core human-factors issue emphasized by the course project.
+	
+
+
+
+Benchmark Formulation
+What is the structure of an item in the dataset? Provide an example item.
+Item Structure:
+* Item ID
+* Temperature
+* Humidity
+* Moisture
+* Soil Type
+* Crop Type
+* Nitrogen
+* Potassium
+* Phosphorous
+* Reference Fertilizer Name
+* Human-factors rubric
+* Optional expected explanation notes
+
+
+Example item:
+* Item ID: 001
+* Temperature: 26
+* Humidity: 52
+* Moisture: 35
+* Soil Type: Sandy
+* Crop Type: Barley
+* Nitrogen: 12
+* Potassium: 10
+* Phosphorous: 13
+* Reference Fertilizer Name: 17-17-17
+* Human-factors rubric:
+   * Did the model recommend the correct fertilizer?
+   * Did it explain the decision using the given field values?
+   * Did it avoid overstating certainty?
+   * Would a human find the explanation useful?
+   * This format is directly compatible with the fields visible in the dataset viewer.
+
+
+	
+
+How to generate data?
+We will use the kaifahmad/Fertilizer-Prediction dataset as the base dataset and convert each tabular row into a benchmark item.
+
+
+We may optionally create prompt-based variants where the same row is presented in natural language to an AI model.
+
+
+We may also optionally use a small number of examples from additional datasets for robustness checks, but not as the main empirical source.
+	
+
+How to annotate data–who are the annotators, what is the annotation task, and how to control quality?
+Annotators: team members
+Annotation task:
+* rate whether the AI explanation uses the input variables correctly
+* rate whether the recommendation is overconfident or appropriately cautious
+* rate whether the output is understandable and useful to a human
+Quality control:
+* double-annotate a subset of items
+* discuss disagreements and refine the rubric
+* finalize annotation rules before evaluating the full benchmark
+* potential list of keywords that indicate confidence levels in language for reference
+	
+
+What is the requirement of the size and diversity of the dataset?
+The base dataset contains 99 rows, spanning multiple soil types, crop types, and fertilizer classes.
+
+
+Breakdown of Data Use:
+* 10–15 items for the dataset draft milestone, which matches the course milestone, and
+* a larger subset or full set for the final release.
+
+
+Diversity Sources:
+* crop type
+* soil type
+* nutrient conditions
+* environmental conditions
+* fertilizer classes
+	
+
+Once the dataset is complete, how to use it to evaluate AI for Science?
+Which AI models or systems will be evaluated? Will there be a development of an auto-evaluation process? What is the evaluation rubric? 
+AI systems:
+* ChatGPT
+* Google Gemini
+
+
+Auto-evaluation:
+* exact match on fertilizer label
+
+
+Human evaluation rubric:
+* Recommendation correctness
+* Explanation relevance
+* Interpretability / clarity
+* Uncertainty calibration
+* Decision-support usefulness
+	
+
+
+
+What are the key ethical and legal considerations?
+Legal Concerns for Datasets:
+* The primary dataset is publicly available on Hugging Face and licensed Apache-2.0.
+
+
+Ethical Concerns for Project:
+* Ethically, the project should avoid implying that benchmark outputs are real agronomic advice for deployment without expert validation.
+* The benchmark must emphasize that fertilizer recommendation is a decision-support task, not a substitute for domain expertise.
