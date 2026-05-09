@@ -1,31 +1,31 @@
-Temparature,Humidity ,Moisture,Soil Type,Crop Type,Nitrogen,Potassium,Phosphorous,Fertilizer Name
-26,52,38,Sandy,Maize,37,0,0,Urea
-32,62,34,Red,Tobacco,22,0,20,28-28
-28,54,46,Clayey,Paddy,35,0,0,Urea
-26,52,35,Sandy,Barley,12,10,13,17-17-17
-25,50,64,Red,Cotton,9,0,10,20-20
-30,60,42,Sandy,Millets,21,0,18,28-28
-25,50,65,Loamy,Cotton,36,0,0,Urea
-26,52,31,Red,Ground Nuts,14,0,41,DAP
-25,50,39,Sandy,Barley,21,0,19,28-28
-29,58,52,Loamy,Wheat,13,0,36,DAP
-30,60,44,Sandy,Millets,10,0,9,20-20
-34,65,53,Loamy,Sugarcane,12,14,12,17-17-17
-37,70,32,Black,Oil seeds,12,0,39,DAP
-26,52,36,Clayey,Pulses,14,0,13,20-20
-29,58,34,Sandy,Millets,15,0,37,DAP
-30,60,58,Loamy,Sugarcane,10,7,32,14-35-14
-26,52,32,Black,Oil seeds,12,0,8,20-20
-29,58,43,Clayey,Paddy,24,0,18,28-28
-31,62,63,Red,Cotton,11,12,15,17-17-17
-34,65,54,Loamy,Wheat,38,0,0,Urea
-27,53,35,Black,Oil seeds,37,0,0,Urea
-29,58,55,Loamy,Sugarcane,8,8,33,14-35-14
-30,60,38,Sandy,Millets,10,0,14,20-20
-26,52,39,Clayey,Pulses,21,0,23,28-28
-33,64,31,Red,Ground Nuts,13,0,39,DAP
-29,58,42,Clayey,Paddy,9,10,22,14-35-14
-26,52,36,Clayey,Pulses,7,16,20,10-26-26
-28,54,43,Clayey,Paddy,10,8,29,14-35-14
-36,68,50,Loamy,Wheat,12,18,19,10-26-26
-28,54,25,Sandy,Maize,9,10,30,14-35-14
+item_id,split_name,Temparature,Humidity ,Moisture,Soil Type,Crop Type,Nitrogen,Potassium,Phosphorous,Fertilizer Name
+FERT-001,split-70-30,26,52,38,Sandy,Maize,37,0,0,Urea
+FERT-004,split-70-30,32,62,34,Red,Tobacco,22,0,20,28-28
+FERT-005,split-70-30,28,54,46,Clayey,Paddy,35,0,0,Urea
+FERT-006,split-70-30,26,52,35,Sandy,Barley,12,10,13,17-17-17
+FERT-007,split-70-30,25,50,64,Red,Cotton,9,0,10,20-20
+FERT-009,split-70-30,30,60,42,Sandy,Millets,21,0,18,28-28
+FERT-013,split-70-30,25,50,65,Loamy,Cotton,36,0,0,Urea
+FERT-015,split-70-30,26,52,31,Red,Ground Nuts,14,0,41,DAP
+FERT-018,split-70-30,25,50,39,Sandy,Barley,21,0,19,28-28
+FERT-020,split-70-30,29,58,52,Loamy,Wheat,13,0,36,DAP
+FERT-021,split-70-30,30,60,44,Sandy,Millets,10,0,9,20-20
+FERT-022,split-70-30,34,65,53,Loamy,Sugarcane,12,14,12,17-17-17
+FERT-029,split-70-30,37,70,32,Black,Oil seeds,12,0,39,DAP
+FERT-030,split-70-30,26,52,36,Clayey,Pulses,14,0,13,20-20
+FERT-040,split-70-30,29,58,34,Sandy,Millets,15,0,37,DAP
+FERT-042,split-70-30,30,60,58,Loamy,Sugarcane,10,7,32,14-35-14
+FERT-047,split-70-30,26,52,32,Black,Oil seeds,12,0,8,20-20
+FERT-048,split-70-30,29,58,43,Clayey,Paddy,24,0,18,28-28
+FERT-055,split-70-30,31,62,63,Red,Cotton,11,12,15,17-17-17
+FERT-057,split-70-30,34,65,54,Loamy,Wheat,38,0,0,Urea
+FERT-065,split-70-30,27,53,35,Black,Oil seeds,37,0,0,Urea
+FERT-068,split-70-30,29,58,55,Loamy,Sugarcane,8,8,33,14-35-14
+FERT-070,split-70-30,30,60,38,Sandy,Millets,10,0,14,20-20
+FERT-071,split-70-30,26,52,39,Clayey,Pulses,21,0,23,28-28
+FERT-075,split-70-30,33,64,31,Red,Ground Nuts,13,0,39,DAP
+FERT-076,split-70-30,29,58,42,Clayey,Paddy,9,10,22,14-35-14
+FERT-079,split-70-30,26,52,36,Clayey,Pulses,7,16,20,10-26-26
+FERT-081,split-70-30,28,54,43,Clayey,Paddy,10,8,29,14-35-14
+FERT-089,split-70-30,36,68,50,Loamy,Wheat,12,18,19,10-26-26
+FERT-094,split-70-30,28,54,25,Sandy,Maize,9,10,30,14-35-14

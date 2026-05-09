@@ -19,13 +19,16 @@ Use one row per grader per response. The same AI response should be graded indep
 Recommended identifier columns:
 
 - `item_id`
+- `split_name`
 - `model_name`
 - `prompt_version`
 - `grader_id`
 - `reference_fertilizer`
 - `model_fertilizer`
 
-The fields `item_id`, `model_name`, and `prompt_version` are what let us match Ethan's grade to Rachel's grade for the same response.
+The fields `item_id`, `split_name`, `model_name`, and `prompt_version` are what let us match Ethan's grade to Rachel's grade for the same response.
+
+`split_name` is required because the same source item can appear in different test sets across `split-80-20`, `split-70-30`, and `split-60-40` evaluations. Grades from different splits should not be paired with each other.
 
 ## Rubric Columns
 
@@ -166,6 +169,7 @@ Calculate Cohen's kappa separately for each rubric column:
 For each calculation:
 
 1. Filter to the same `item_id`, `model_name`, and `prompt_version` rows for both graders.
+   Include `split_name` in this match so separate split evaluations remain distinct.
 2. Pair Ethan's label and Rachel's label for that rubric column.
 3. Calculate observed agreement, which is how often the two graders chose the same label.
 4. Calculate expected agreement, which is how often they would be expected to agree by chance based on their label distributions.

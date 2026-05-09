@@ -1,41 +1,41 @@
-Temparature,Humidity ,Moisture,Soil Type,Crop Type,Nitrogen,Potassium,Phosphorous,Fertilizer Name
-29,58,33,Black,Oil seeds,9,7,30,14-35-14
-31,62,48,Sandy,Maize,14,15,12,17-17-17
-26,52,31,Red,Ground Nuts,14,0,41,DAP
-31,62,49,Black,Sugarcane,10,13,14,17-17-17
-33,64,34,Clayey,Pulses,38,0,0,Urea
-25,50,39,Sandy,Barley,21,0,19,28-28
-30,60,44,Sandy,Millets,10,0,9,20-20
-34,65,53,Loamy,Sugarcane,12,14,12,17-17-17
-33,64,39,Clayey,Paddy,13,0,10,20-20
-30,60,63,Red,Cotton,9,9,29,14-35-14
-37,70,32,Black,Oil seeds,12,0,39,DAP
-26,52,36,Clayey,Pulses,14,0,13,20-20
-30,60,27,Loamy,Sugarcane,12,0,40,DAP
-34,65,38,Clayey,Paddy,39,0,0,Urea
-36,68,38,Sandy,Barley,7,9,30,14-35-14
-30,60,61,Loamy,Cotton,8,10,31,14-35-14
-32,62,34,Red,Tobacco,22,0,24,28-28
-34,65,60,Black,Sugarcane,35,0,0,Urea
-35,67,42,Sandy,Barley,10,0,35,DAP
-38,70,48,Loamy,Wheat,8,8,28,14-35-14
-26,52,32,Black,Oil seeds,12,0,8,20-20
-34,65,31,Red,Tobacco,23,0,21,28-28
-36,68,33,Black,Oil seeds,13,0,14,20-20
-30,60,47,Sandy,Barley,12,0,42,DAP
-31,62,63,Red,Cotton,11,12,15,17-17-17
-29,58,37,Sandy,Millets,8,0,15,20-20
-32,62,34,Red,Ground Nuts,15,0,37,DAP
-28,54,41,Clayey,Paddy,36,0,0,Urea
-30,60,49,Loamy,Wheat,13,0,9,20-20
-28,54,47,Sandy,Barley,5,18,15,10-26-26
-36,68,62,Red,Cotton,15,0,40,DAP
-34,65,57,Black,Sugarcane,9,0,13,20-20
-29,58,55,Loamy,Sugarcane,8,8,33,14-35-14
-31,62,32,Red,Tobacco,39,0,0,Urea
-27,53,59,Loamy,Sugarcane,10,0,15,20-20
-28,54,43,Clayey,Paddy,10,8,29,14-35-14
-30,60,26,Black,Oil seeds,8,9,30,14-35-14
-34,65,45,Clayey,Paddy,6,19,21,10-26-26
-38,72,51,Loamy,Wheat,39,0,0,Urea
-36,60,43,Sandy,Millets,15,0,41,DAP
+item_id,split_name,Temparature,Humidity ,Moisture,Soil Type,Crop Type,Nitrogen,Potassium,Phosphorous,Fertilizer Name
+FERT-010,split-60-40,29,58,33,Black,Oil seeds,9,7,30,14-35-14
+FERT-012,split-60-40,31,62,48,Sandy,Maize,14,15,12,17-17-17
+FERT-015,split-60-40,26,52,31,Red,Ground Nuts,14,0,41,DAP
+FERT-016,split-60-40,31,62,49,Black,Sugarcane,10,13,14,17-17-17
+FERT-017,split-60-40,33,64,34,Clayey,Pulses,38,0,0,Urea
+FERT-018,split-60-40,25,50,39,Sandy,Barley,21,0,19,28-28
+FERT-021,split-60-40,30,60,44,Sandy,Millets,10,0,9,20-20
+FERT-022,split-60-40,34,65,53,Loamy,Sugarcane,12,14,12,17-17-17
+FERT-025,split-60-40,33,64,39,Clayey,Paddy,13,0,10,20-20
+FERT-027,split-60-40,30,60,63,Red,Cotton,9,9,29,14-35-14
+FERT-029,split-60-40,37,70,32,Black,Oil seeds,12,0,39,DAP
+FERT-030,split-60-40,26,52,36,Clayey,Pulses,14,0,13,20-20
+FERT-032,split-60-40,30,60,27,Loamy,Sugarcane,12,0,40,DAP
+FERT-033,split-60-40,34,65,38,Clayey,Paddy,39,0,0,Urea
+FERT-034,split-60-40,36,68,38,Sandy,Barley,7,9,30,14-35-14
+FERT-037,split-60-40,30,60,61,Loamy,Cotton,8,10,31,14-35-14
+FERT-043,split-60-40,32,62,34,Red,Tobacco,22,0,24,28-28
+FERT-044,split-60-40,34,65,60,Black,Sugarcane,35,0,0,Urea
+FERT-045,split-60-40,35,67,42,Sandy,Barley,10,0,35,DAP
+FERT-046,split-60-40,38,70,48,Loamy,Wheat,8,8,28,14-35-14
+FERT-047,split-60-40,26,52,32,Black,Oil seeds,12,0,8,20-20
+FERT-051,split-60-40,34,65,31,Red,Tobacco,23,0,21,28-28
+FERT-052,split-60-40,36,68,33,Black,Oil seeds,13,0,14,20-20
+FERT-054,split-60-40,30,60,47,Sandy,Barley,12,0,42,DAP
+FERT-055,split-60-40,31,62,63,Red,Cotton,11,12,15,17-17-17
+FERT-058,split-60-40,29,58,37,Sandy,Millets,8,0,15,20-20
+FERT-060,split-60-40,32,62,34,Red,Ground Nuts,15,0,37,DAP
+FERT-061,split-60-40,28,54,41,Clayey,Paddy,36,0,0,Urea
+FERT-062,split-60-40,30,60,49,Loamy,Wheat,13,0,9,20-20
+FERT-064,split-60-40,28,54,47,Sandy,Barley,5,18,15,10-26-26
+FERT-066,split-60-40,36,68,62,Red,Cotton,15,0,40,DAP
+FERT-067,split-60-40,34,65,57,Black,Sugarcane,9,0,13,20-20
+FERT-068,split-60-40,29,58,55,Loamy,Sugarcane,8,8,33,14-35-14
+FERT-072,split-60-40,31,62,32,Red,Tobacco,39,0,0,Urea
+FERT-078,split-60-40,27,53,59,Loamy,Sugarcane,10,0,15,20-20
+FERT-081,split-60-40,28,54,43,Clayey,Paddy,10,8,29,14-35-14
+FERT-091,split-60-40,30,60,26,Black,Oil seeds,8,9,30,14-35-14
+FERT-092,split-60-40,34,65,45,Clayey,Paddy,6,19,21,10-26-26
+FERT-097,split-60-40,38,72,51,Loamy,Wheat,39,0,0,Urea
+FERT-098,split-60-40,36,60,43,Sandy,Millets,15,0,41,DAP

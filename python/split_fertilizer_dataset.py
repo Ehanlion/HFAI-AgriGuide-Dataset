@@ -9,6 +9,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DATASET_DIR = PROJECT_ROOT / "datasets"
 SOURCE_DATASET_PATH = DATASET_DIR / "fertilizer-prediction-dataset.csv"
 
+ITEM_ID_COLUMN = "item_id"
+SPLIT_NAME_COLUMN = "split_name"
+FERTILIZER_COLUMN = "Fertilizer Name"
 CATEGORY_COLUMNS = ["Crop Type", "Soil Type", "Fertilizer Name"]
 SPLITS = {
     "80-20": 0.20,
@@ -24,6 +27,12 @@ def read_dataset() -> tuple[list[str], list[dict[str, str]]]:
         if reader.fieldnames is None:
             raise ValueError(f"{SOURCE_DATASET_PATH} does not contain a header row.")
 
+        if ITEM_ID_COLUMN not in reader.fieldnames:
+            raise ValueError(
+                f"{SOURCE_DATASET_PATH} must include an '{ITEM_ID_COLUMN}' column. "
+                "Add stable item IDs before generating splits."
+            )
+
         missing_columns = [
             column for column in CATEGORY_COLUMNS if column not in reader.fieldnames
         ]
@@ -31,6 +40,19 @@ def read_dataset() -> tuple[list[str], list[dict[str, str]]]:
             raise ValueError(f"Missing category columns: {', '.join(missing_columns)}")
 
         return reader.fieldnames, list(reader)
+
+
+def validate_item_ids(rows: list[dict[str, str]]) -> None:
+    item_ids = [(row.get(ITEM_ID_COLUMN) or "").strip() for row in rows]
+    missing_count = sum(1 for item_id in item_ids if not item_id)
+    if missing_count:
+        raise ValueError(f"{missing_count} rows are missing '{ITEM_ID_COLUMN}' values.")
+
+    duplicate_ids = sorted(
+        item_id for item_id, count in Counter(item_ids).items() if count > 1
+    )
+    if duplicate_ids:
+        raise ValueError(f"Duplicate item IDs found: {', '.join(duplicate_ids)}")
 
 
 def category_values(row: dict[str, str]) -> set[tuple[str, str]]:
@@ -62,6 +84,47 @@ def train_dataset_path(split_name: str) -> Path:
 
 def test_dataset_path(split_name: str) -> Path:
     return split_dir(split_name) / "fertilizer-prediction-test.csv"
+
+
+def model_test_dataset_path(split_name: str) -> Path:
+    return split_dir(split_name) / "fertilizer-prediction-test-model.csv"
+
+
+def split_fieldnames(fieldnames: list[str]) -> list[str]:
+    return [ITEM_ID_COLUMN, SPLIT_NAME_COLUMN] + [
+        fieldname
+        for fieldname in fieldnames
+        if fieldname not in {ITEM_ID_COLUMN, SPLIT_NAME_COLUMN}
+    ]
+
+
+def model_test_fieldnames(fieldnames: list[str]) -> list[str]:
+    return [
+        fieldname
+        for fieldname in split_fieldnames(fieldnames)
+        if fieldname != FERTILIZER_COLUMN
+    ]
+
+
+def add_split_name(rows: list[dict[str, str]], split_name: str) -> list[dict[str, str]]:
+    return [
+        {
+            **row,
+            SPLIT_NAME_COLUMN: f"split-{split_name}",
+        }
+        for row in rows
+    ]
+
+
+def remove_fertilizer_name(rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    return [
+        {
+            fieldname: value
+            for fieldname, value in row.items()
+            if fieldname != FERTILIZER_COLUMN
+        }
+        for row in rows
+    ]
 
 
 def build_test_indices(
@@ -177,14 +240,26 @@ def write_split(
 
     output_dir = split_dir(split_name)
     output_dir.mkdir(parents=True, exist_ok=True)
-    write_dataset(train_dataset_path(split_name), fieldnames, train_rows)
-    write_dataset(test_dataset_path(split_name), fieldnames, test_rows)
+    output_fieldnames = split_fieldnames(fieldnames)
+    train_rows_with_split = add_split_name(train_rows, split_name)
+    test_rows_with_split = add_split_name(test_rows, split_name)
+    write_dataset(train_dataset_path(split_name), output_fieldnames, train_rows_with_split)
+    write_dataset(test_dataset_path(split_name), output_fieldnames, test_rows_with_split)
+    write_dataset(
+        model_test_dataset_path(split_name),
+        model_test_fieldnames(fieldnames),
+        remove_fertilizer_name(test_rows_with_split),
+    )
 
-    print(f"Wrote split-{split_name}: {len(train_rows)} train rows, {len(test_rows)} test rows")
+    print(
+        f"Wrote split-{split_name}: {len(train_rows)} train rows, "
+        f"{len(test_rows)} test rows, {len(test_rows)} model test rows"
+    )
 
 
 def main() -> None:
     fieldnames, rows = read_dataset()
+    validate_item_ids(rows)
     validate_all_categories_can_be_split(rows)
 
     for split_name, test_ratio in requested_splits():

@@ -1,0 +1,41 @@
+item_id,split_name,Temparature,Humidity ,Moisture,Soil Type,Crop Type,Nitrogen,Potassium,Phosphorous
+FERT-010,split-60-40,29,58,33,Black,Oil seeds,9,7,30
+FERT-012,split-60-40,31,62,48,Sandy,Maize,14,15,12
+FERT-015,split-60-40,26,52,31,Red,Ground Nuts,14,0,41
+FERT-016,split-60-40,31,62,49,Black,Sugarcane,10,13,14
+FERT-017,split-60-40,33,64,34,Clayey,Pulses,38,0,0
+FERT-018,split-60-40,25,50,39,Sandy,Barley,21,0,19
+FERT-021,split-60-40,30,60,44,Sandy,Millets,10,0,9
+FERT-022,split-60-40,34,65,53,Loamy,Sugarcane,12,14,12
+FERT-025,split-60-40,33,64,39,Clayey,Paddy,13,0,10
+FERT-027,split-60-40,30,60,63,Red,Cotton,9,9,29
+FERT-029,split-60-40,37,70,32,Black,Oil seeds,12,0,39
+FERT-030,split-60-40,26,52,36,Clayey,Pulses,14,0,13
+FERT-032,split-60-40,30,60,27,Loamy,Sugarcane,12,0,40
+FERT-033,split-60-40,34,65,38,Clayey,Paddy,39,0,0
+FERT-034,split-60-40,36,68,38,Sandy,Barley,7,9,30
+FERT-037,split-60-40,30,60,61,Loamy,Cotton,8,10,31
+FERT-043,split-60-40,32,62,34,Red,Tobacco,22,0,24
+FERT-044,split-60-40,34,65,60,Black,Sugarcane,35,0,0
+FERT-045,split-60-40,35,67,42,Sandy,Barley,10,0,35
+FERT-046,split-60-40,38,70,48,Loamy,Wheat,8,8,28
+FERT-047,split-60-40,26,52,32,Black,Oil seeds,12,0,8
+FERT-051,split-60-40,34,65,31,Red,Tobacco,23,0,21
+FERT-052,split-60-40,36,68,33,Black,Oil seeds,13,0,14
+FERT-054,split-60-40,30,60,47,Sandy,Barley,12,0,42
+FERT-055,split-60-40,31,62,63,Red,Cotton,11,12,15
+FERT-058,split-60-40,29,58,37,Sandy,Millets,8,0,15
+FERT-060,split-60-40,32,62,34,Red,Ground Nuts,15,0,37
+FERT-061,split-60-40,28,54,41,Clayey,Paddy,36,0,0
+FERT-062,split-60-40,30,60,49,Loamy,Wheat,13,0,9
+FERT-064,split-60-40,28,54,47,Sandy,Barley,5,18,15
+FERT-066,split-60-40,36,68,62,Red,Cotton,15,0,40
+FERT-067,split-60-40,34,65,57,Black,Sugarcane,9,0,13
+FERT-068,split-60-40,29,58,55,Loamy,Sugarcane,8,8,33
+FERT-072,split-60-40,31,62,32,Red,Tobacco,39,0,0
+FERT-078,split-60-40,27,53,59,Loamy,Sugarcane,10,0,15
+FERT-081,split-60-40,28,54,43,Clayey,Paddy,10,8,29
+FERT-091,split-60-40,30,60,26,Black,Oil seeds,8,9,30
+FERT-092,split-60-40,34,65,45,Clayey,Paddy,6,19,21
+FERT-097,split-60-40,38,72,51,Loamy,Wheat,39,0,0
+FERT-098,split-60-40,36,60,43,Sandy,Millets,15,0,41

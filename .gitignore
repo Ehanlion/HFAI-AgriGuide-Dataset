@@ -2,3 +2,5 @@
 .agents/rules/
 .venv/
 AGENTS.md
+__pycache__/
+*.pyc
