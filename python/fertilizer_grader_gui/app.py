@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import csv
+import html
 import json
 import re
 import sys
 from pathlib import Path
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QCloseEvent
+from PySide6.QtGui import QBrush, QCloseEvent, QColor, QFont
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QApplication,
@@ -113,6 +114,176 @@ REASONING_FIELDS = [
     "decision_support_notes",
 ]
 
+THEMES = {
+    "light": {
+        "window": "#f7f3e8",
+        "text": "#253327",
+        "panel": "#fffdf6",
+        "panel_alt": "#f1ead8",
+        "border": "#c8bfa9",
+        "accent": "#2f7d50",
+        "accent_hover": "#3c9561",
+        "accent_dark": "#1f5c39",
+        "field_bg": "#e2efd6",
+        "field_text": "#234b34",
+        "button_bg": "#fff8df",
+        "button_hover": "#ffe8a6",
+        "button_pressed": "#e9c45e",
+        "button_border": "#cf9f3d",
+        "confirm": "#b65d24",
+        "confirm_hover": "#cf7030",
+        "confirm_border": "#884218",
+        "reasoning_heading_bg": "#e2efd6",
+        "reasoning_heading_text": "#234b34",
+    },
+    "dark": {
+        "window": "#18231d",
+        "text": "#edf4e9",
+        "panel": "#223026",
+        "panel_alt": "#2b3b30",
+        "border": "#60715c",
+        "accent": "#65a86f",
+        "accent_hover": "#76ba80",
+        "accent_dark": "#3f7448",
+        "field_bg": "#314734",
+        "field_text": "#d8f1d5",
+        "button_bg": "#344136",
+        "button_hover": "#41513f",
+        "button_pressed": "#4d604a",
+        "button_border": "#6c805f",
+        "confirm": "#c7783e",
+        "confirm_hover": "#dc884a",
+        "confirm_border": "#9c5729",
+        "reasoning_heading_bg": "#314734",
+        "reasoning_heading_text": "#d8f1d5",
+    },
+}
+
+APP_STYLESHEET_TEMPLATE = """
+QMainWindow, QWidget {
+    background: {window};
+    color: {text};
+    font-size: 16px;
+}
+
+QLineEdit, QTextEdit, QTableWidget {
+    background: {panel};
+    color: {text};
+    border: 1px solid {border};
+    border-radius: 6px;
+    padding: 8px;
+    selection-background-color: {accent};
+    selection-color: #ffffff;
+}
+
+QLineEdit {
+    min-height: 34px;
+}
+
+QTextEdit {
+    font-size: 17px;
+    line-height: 1.35;
+}
+
+QHeaderView::section {
+    background: {accent_dark};
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 8px;
+    border: 0;
+}
+
+QGroupBox {
+    border: 2px solid {border};
+    border-radius: 8px;
+    margin-top: 16px;
+    padding: 14px 10px 10px 10px;
+    font-size: 20px;
+    font-weight: 800;
+    color: {reasoning_heading_text};
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 14px;
+    padding: 0 8px;
+    background: {window};
+}
+
+QLabel {
+    font-size: 17px;
+    font-weight: 700;
+    color: {text};
+}
+
+QPushButton {
+    background: {button_bg};
+    border: 2px solid {button_border};
+    border-radius: 8px;
+    color: {text};
+    font-size: 16px;
+    font-weight: 800;
+    padding: 9px 16px;
+}
+
+QPushButton:hover {
+    background: {button_hover};
+}
+
+QPushButton:pressed {
+    background: {button_pressed};
+}
+
+QPushButton#loadButton {
+    background: {accent};
+    border-color: {accent_dark};
+    color: #ffffff;
+}
+
+QPushButton#loadButton:hover {
+    background: {accent_hover};
+}
+
+QPushButton[role="grade"] {
+    background: {accent};
+    border-color: {accent_dark};
+    color: #ffffff;
+    font-size: 24px;
+    min-height: 76px;
+    min-width: 150px;
+    padding: 16px 24px;
+}
+
+QPushButton[role="grade"]:hover {
+    background: {accent_hover};
+}
+
+QPushButton[role="confirm"] {
+    background: {confirm};
+    border-color: {confirm_border};
+    color: #ffffff;
+    font-size: 22px;
+    min-height: 68px;
+    padding: 14px 22px;
+}
+
+QPushButton[role="confirm"]:hover {
+    background: {confirm_hover};
+}
+
+QPushButton[role="edit"] {
+    min-height: 50px;
+}
+"""
+
+
+def build_stylesheet(theme: dict[str, str]) -> str:
+    stylesheet = APP_STYLESHEET_TEMPLATE
+    for key, value in theme.items():
+        stylesheet = stylesheet.replace(f"{{{key}}}", value)
+    return stylesheet
+
 
 def read_csv_rows(path: Path) -> tuple[list[str], list[dict[str, str]]]:
     with path.open(newline="", encoding="utf-8-sig") as csv_file:
@@ -159,19 +330,39 @@ def write_gui_state(state: dict[str, str]) -> None:
 class KeyValueTable(QTableWidget):
     def __init__(self) -> None:
         super().__init__(0, 2)
+        self.theme = THEMES["light"]
         self.setHorizontalHeaderLabels(["Field", "Value"])
         self.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         self.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         self.verticalHeader().setVisible(False)
         self.setWordWrap(True)
         self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.setAlternatingRowColors(True)
+        self.apply_theme(self.theme)
+
+    def apply_theme(self, theme: dict[str, str]) -> None:
+        self.theme = theme
+        self.setStyleSheet(
+            f"QTableWidget {{ alternate-background-color: {theme['panel_alt']}; }}"
+            "QTableWidget::item { padding: 6px; }"
+        )
 
     def set_mapping(self, values: dict[str, str], fields: list[str] | None = None) -> None:
         names = fields or list(values.keys())
         self.setRowCount(len(names))
         for row_index, field in enumerate(names):
-            self.setItem(row_index, 0, QTableWidgetItem(field))
-            self.setItem(row_index, 1, QTableWidgetItem(values.get(field, "")))
+            field_item = QTableWidgetItem(field)
+            field_font = QFont()
+            field_font.setBold(True)
+            field_item.setFont(field_font)
+            field_item.setForeground(QBrush(QColor(self.theme["field_text"])))
+            field_item.setBackground(QBrush(QColor(self.theme["field_bg"])))
+            self.setItem(row_index, 0, field_item)
+
+            value_item = QTableWidgetItem(values.get(field, ""))
+            value_item.setForeground(QBrush(QColor(self.theme["text"])))
+            value_item.setBackground(QBrush(QColor(self.theme["panel"])))
+            self.setItem(row_index, 1, value_item)
         self.resizeRowsToContents()
 
 
@@ -180,6 +371,7 @@ class GraderWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("AgriGuide Fertilizer Grader")
         self.resize(1300, 820)
+        self.theme_name = "light"
 
         self.model_path: Path | None = None
         self.reference_path: Path | None = None
@@ -199,6 +391,8 @@ class GraderWindow(QMainWindow):
         layout = QVBoxLayout(central)
 
         top = QGridLayout()
+        top.setHorizontalSpacing(10)
+        top.setVerticalSpacing(10)
         self.grader_input = QLineEdit()
         self.output_input = QLineEdit(str(DEFAULT_OUTPUT_DIR))
         self.model_input = QLineEdit()
@@ -225,8 +419,14 @@ class GraderWindow(QMainWindow):
         top.addWidget(reference_button, 2, 4)
 
         load_button = QPushButton("Load Grading Session")
+        load_button.setObjectName("loadButton")
         load_button.clicked.connect(self.load_session)
         top.addWidget(load_button, 3, 3, 1, 2)
+        self.theme_button = QPushButton("Dark Theme")
+        self.theme_button.setCheckable(True)
+        self.theme_button.clicked.connect(self.toggle_theme)
+        top.addWidget(QLabel("Theme"), 3, 0)
+        top.addWidget(self.theme_button, 3, 1)
         layout.addLayout(top)
 
         splitter = QSplitter(Qt.Orientation.Horizontal)
@@ -241,26 +441,35 @@ class GraderWindow(QMainWindow):
         layout.addWidget(splitter, stretch=1)
 
         self.progress_label = QLabel("Load a grading session to begin.")
+        self.progress_label.setObjectName("progressLabel")
         layout.addWidget(self.progress_label)
 
         self.grading_box = QGroupBox("Grade")
+        self.grading_box.setMinimumHeight(250)
         self.grading_layout = QVBoxLayout(self.grading_box)
+        self.grading_layout.setSpacing(14)
         self.prompt_label = QLabel("")
+        self.prompt_label.setObjectName("promptLabel")
+        self.prompt_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.prompt_label.setWordWrap(True)
         self.button_row = QHBoxLayout()
+        self.button_row.setSpacing(14)
         self.review_table = KeyValueTable()
         self.review_table.hide()
         self.confirm_row = QHBoxLayout()
+        self.confirm_row.setSpacing(10)
         self.grading_layout.addWidget(self.prompt_label)
         self.grading_layout.addLayout(self.button_row)
         self.grading_layout.addWidget(self.review_table)
         self.grading_layout.addLayout(self.confirm_row)
         layout.addWidget(self.grading_box)
         self.load_gui_state()
+        self.apply_theme(self.theme_name)
 
     def wrap(self, title: str, widget: QWidget) -> QGroupBox:
         box = QGroupBox(title)
         layout = QVBoxLayout(box)
+        layout.setContentsMargins(10, 14, 10, 10)
         layout.addWidget(widget)
         return box
 
@@ -285,6 +494,8 @@ class GraderWindow(QMainWindow):
         self.output_input.setText(state.get("output_dir", str(DEFAULT_OUTPUT_DIR)))
         self.model_input.setText(state.get("model_csv", ""))
         self.reference_input.setText(state.get("reference_csv", ""))
+        stored_theme = state.get("theme", "light")
+        self.theme_name = stored_theme if stored_theme in THEMES else "light"
 
         width = state.get("window_width", "")
         height = state.get("window_height", "")
@@ -306,8 +517,24 @@ class GraderWindow(QMainWindow):
                 "window_height": str(self.height()),
                 "window_x": str(self.x()),
                 "window_y": str(self.y()),
+                "theme": self.theme_name,
             }
         )
+
+    def apply_theme(self, theme_name: str) -> None:
+        self.theme_name = theme_name if theme_name in THEMES else "light"
+        theme = THEMES[self.theme_name]
+        self.setStyleSheet(build_stylesheet(theme))
+        self.theme_button.setChecked(self.theme_name == "dark")
+        self.theme_button.setText("Light Theme" if self.theme_name == "dark" else "Dark Theme")
+        self.model_table.apply_theme(theme)
+        self.reference_table.apply_theme(theme)
+        self.review_table.apply_theme(theme)
+        self.refresh_reasoning_view()
+
+    def toggle_theme(self) -> None:
+        self.apply_theme("dark" if self.theme_name == "light" else "light")
+        self.save_gui_state()
 
     def closeEvent(self, event: QCloseEvent) -> None:
         self.grader_input.setText(safe_name(self.grader_input.text()) if self.grader_input.text().strip() else "")
@@ -397,20 +624,72 @@ class GraderWindow(QMainWindow):
         self.current_rubric_index = 0
         model_row = self.model_rows[self.current_index]
         reference_row = self.reference_rows_by_key[self.row_key(model_row)]
-        self.model_table.set_mapping(model_row)
-        self.reference_table.set_mapping(reference_row)
-        self.reasoning_view.setPlainText(
-            "\n\n".join(
-                f"{field}:\n{model_row.get(field, '')}"
-                for field in REASONING_FIELDS
-                if field in model_row
-            )
+        self.model_table.set_mapping(
+            model_row,
+            [field for field in model_row if field not in REASONING_FIELDS],
         )
+        self.reference_table.set_mapping(reference_row)
+        self.refresh_reasoning_view()
         self.progress_label.setText(
             f"Item {self.current_index + 1} of {len(self.model_rows)} "
             f"({model_row.get(SPLIT_NAME_COLUMN)} / {model_row.get(ITEM_ID_COLUMN)})"
         )
         self.show_rubric_prompt()
+
+    def refresh_reasoning_view(self) -> None:
+        if not self.model_rows or self.current_index >= len(self.model_rows):
+            return
+
+        model_row = self.model_rows[self.current_index]
+        theme = THEMES[self.theme_name]
+        sections = []
+        for field in REASONING_FIELDS:
+            if field not in model_row:
+                continue
+            title = html.escape(field.replace("_", " ").title())
+            value = html.escape(model_row.get(field, "")).replace("\n", "<br>")
+            sections.append(
+                "<section>"
+                f"<div class='reasoning-title'>{title}</div>"
+                f"<div class='reasoning-body'>{value}</div>"
+                "</section>"
+            )
+
+        self.reasoning_view.setHtml(
+            f"""
+            <html>
+            <head>
+            <style>
+                body {{
+                    background: {theme["panel"]};
+                    color: {theme["text"]};
+                    font-family: Segoe UI, Arial, sans-serif;
+                    font-size: 17px;
+                    line-height: 1.35;
+                    margin: 0;
+                }}
+                section {{
+                    margin: 0 0 18px 0;
+                }}
+                .reasoning-title {{
+                    background: {theme["reasoning_heading_bg"]};
+                    color: {theme["reasoning_heading_text"]};
+                    border: 1px solid {theme["border"]};
+                    border-radius: 6px;
+                    font-size: 18px;
+                    font-weight: 800;
+                    padding: 8px 10px;
+                    margin-bottom: 8px;
+                }}
+                .reasoning-body {{
+                    padding: 2px 4px 0 4px;
+                }}
+            </style>
+            </head>
+            <body>{"".join(sections)}</body>
+            </html>
+            """
+        )
 
     def clear_layout(self, layout: QHBoxLayout) -> None:
         while layout.count():
@@ -430,9 +709,11 @@ class GraderWindow(QMainWindow):
         self.clear_layout(self.button_row)
         self.clear_layout(self.confirm_row)
         column, title, options = RUBRICS[self.current_rubric_index]
-        self.prompt_label.setText(f"{title}: choose a grade for `{column}`.")
+        self.prompt_label.setText(f"<b>{title}</b>: choose a grade for <b>{column}</b>.")
+        self.button_row.addStretch()
         for label, tooltip in options:
             button = QPushButton(label)
+            button.setProperty("role", "grade")
             button.setToolTip(tooltip)
             button.clicked.connect(lambda _checked=False, value=label: self.record_grade(value))
             self.button_row.addWidget(button)
@@ -455,18 +736,22 @@ class GraderWindow(QMainWindow):
     def show_confirmation(self) -> None:
         self.clear_layout(self.button_row)
         self.clear_layout(self.confirm_row)
-        self.prompt_label.setText("Review grades before confirming this item.")
+        self.prompt_label.setText("<b>Review grades</b> before confirming this item.")
         self.review_table.set_mapping(self.current_grades, [rubric[0] for rubric in RUBRICS])
         self.review_table.show()
 
+        self.confirm_row.addStretch()
         for index, (_column, title, _options) in enumerate(RUBRICS):
             button = QPushButton(f"Edit {title}")
+            button.setProperty("role", "edit")
             button.clicked.connect(lambda _checked=False, rubric_index=index: self.edit_rubric(rubric_index))
             self.confirm_row.addWidget(button)
 
         confirm = QPushButton("Confirm and Save")
+        confirm.setProperty("role", "confirm")
         confirm.clicked.connect(self.confirm_current_item)
         self.confirm_row.addWidget(confirm)
+        self.confirm_row.addStretch()
 
     def edit_rubric(self, rubric_index: int) -> None:
         self.editing_existing_grade = True
@@ -506,6 +791,7 @@ class GraderWindow(QMainWindow):
 
 def main() -> None:
     app = QApplication(sys.argv)
+    app.setFont(QFont("Segoe UI", 12))
     window = GraderWindow()
     window.show()
     sys.exit(app.exec())
