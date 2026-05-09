@@ -50,3 +50,7 @@ Required columns:
 - Use `confidence_statement` to state how confident the model is.
 - Use `uncertainty_or_caution` to explain limitations and note that real fertilizer decisions should be verified with soil testing, local expertise, or agronomic guidance.
 - Use `decision_support_notes` for concise practical notes that would help a human interpret the recommendation responsibly.
+
+## Tooling Usages
+
+You may not search dataset sites such as HuggingFace or Kaggle to find the datasets or similar datasets when developing your answers. You are free to search the internet and scientific sources, but refrain from searching on dataset sites in order to not directly examine potential matching datasets with answers in them please.
