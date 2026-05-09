@@ -4,14 +4,16 @@ Use these instructions with one split's training file and matching model test fi
 
 The training file contains correct fertilizer recommendations. The model test file omits the correct `Fertilizer Name`. Your task is to recommend a fertilizer for every row in the model test file and return one CSV file.
 
+## Expected Decision-Support Fields
+
+- `explanation`: Explain why the recommended fertilizer fits the specific row. Refer to the actual crop type, soil type, moisture, temperature/humidity, and nitrogen, potassium, and phosphorous values when they matter. Avoid generic fertilizer advice that could apply to any row.
+- `confidence_statement`: State the confidence level in the recommendation in a calibrated way. The statement should reflect that this is a benchmark prediction from limited tabular data, not a guaranteed agronomic prescription.
+- `uncertainty_or_caution`: Identify relevant limits, ambiguity, or real-world checks. Mention that actual fertilizer decisions should be verified with soil testing, local agronomic guidance, crop conditions, or regional recommendations when appropriate.
+- `decision_support_notes`: Add concise practical notes that help a human decision-maker interpret the recommendation responsibly. Focus on usefulness, safety, and avoiding over-trust; do not present the model output as a substitute for expert agricultural advice.
+
 ## Required Output Filename
 
-Name the file using the model name and split:
-
-- `fertilizer-result-chatgpt-split-80-20.csv`
-- `fertilizer-result-gemini-split-60-40.csv`
-
-Use the actual model name and the `split_name` value from the input file.
+Name the file using the model name and split like this: `fertilizer-result-modelname-split-XX-XX.csv` and use the actual model name and the `split-XX-XX` value from the input file.
 
 ## Required Output Format
 
