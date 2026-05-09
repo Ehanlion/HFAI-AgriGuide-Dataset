@@ -71,7 +71,7 @@ The split script preserves category coverage for `Crop Type`, `Soil Type`, and `
 
 ## Model Output and Grading Workflow
 
-Use `project-docs/fertilizer-model-output-instructions.md` when asking a model to recommend fertilizers for a model-facing test file. The instructions define both the required CSV columns and the expected decision-support content for explanation, confidence, uncertainty/caution, and practical notes.
+Use `project-docs/model-output-instructions.md` when asking a model to recommend fertilizers for a model-facing test file. The instructions define both the required CSV columns and the expected decision-support content for explanation, confidence, uncertainty/caution, and practical notes.
 
 Use `project-docs/cohen-kappa-grading.md` for the human grading rubric. The grader GUI is intended to produce grading CSVs that can be compared between graders for Cohen's kappa calculations.
 
