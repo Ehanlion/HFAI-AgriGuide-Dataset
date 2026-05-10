@@ -20,6 +20,7 @@ ITEM_ID_COLUMN = "item_id"
 SPLIT_NAME_COLUMN = "split_name"
 MODEL_NAME_COLUMN = "model_name"
 PROMPT_VERSION_COLUMN = "prompt_version"
+RESULT_MODEL_ID_COLUMN = "result_model_id"
 GRADER_ID_COLUMN = "grader_id"
 MODEL_FERTILIZER_COLUMN = "model_fertilizer"
 
@@ -116,12 +117,14 @@ def safe_column_token(value: str) -> str:
     return cleaned.strip("_") or "grader"
 
 
-def row_key(row: dict[str, str]) -> tuple[str, str, str, str]:
+def row_key(row: dict[str, str]) -> tuple[str, str, str]:
+    result_model_id = row.get(RESULT_MODEL_ID_COLUMN, "").strip()
+    if not result_model_id:
+        result_model_id = model_label(row)
     return (
         row.get(SPLIT_NAME_COLUMN, "").strip(),
         row.get(ITEM_ID_COLUMN, "").strip(),
-        row.get(MODEL_NAME_COLUMN, "").strip(),
-        row.get(PROMPT_VERSION_COLUMN, "").strip(),
+        result_model_id,
     )
 
 
@@ -174,6 +177,16 @@ def files_for_split(directory: Path, token: str) -> list[Path]:
     return sorted(path for path in directory.glob("*.csv") if split_token(path.name) == token)
 
 
+def filename_model_id(path: Path, token: str) -> str | None:
+    match = re.match(
+        rf"^fertilizer-result-(?P<model>.+)-split-{re.escape(token)}(?:-.+)?$",
+        path.stem,
+    )
+    if not match:
+        return None
+    return match.group("model").strip() or None
+
+
 def reference_path_for_split(token: str) -> Path:
     return DATASETS_DIR / split_name(token) / "fertilizer-prediction-test.csv"
 
@@ -186,13 +199,25 @@ def model_label(row: dict[str, str]) -> str:
     return model_name
 
 
+def model_identity(path: Path, token: str, row: dict[str, str]) -> str:
+    return filename_model_id(path, token) or model_label(row)
+
+
+def model_summary_label(path: Path, token: str, row: dict[str, str]) -> str:
+    identity = model_identity(path, token, row)
+    label = model_label(row)
+    if identity and identity != label:
+        return f"{identity} ({label})"
+    return identity
+
+
 def summarize_split(token: str) -> SplitSummary:
     models: set[str] = set()
     for path in files_for_split(MODEL_RESULTS_DIR, token):
         fieldnames, rows = read_csv_rows(path)
         require_columns(path, fieldnames, MODEL_REQUIRED_COLUMNS)
         validate_single_split(path, rows, split_name(token))
-        models.update(model_label(row) for row in rows)
+        models.update(model_summary_label(path, token, row) for row in rows)
 
     graders: set[str] = set()
     for path in files_for_split(GRADING_RESULTS_DIR, token):
@@ -266,7 +291,7 @@ def load_models(token: str) -> tuple[list[str], list[dict[str, str]]]:
 
     output_fields: list[str] = []
     rows: list[dict[str, str]] = []
-    seen_keys: set[tuple[str, str, str, str]] = set()
+    seen_keys: set[tuple[str, str, str]] = set()
     for path in paths:
         fieldnames, file_rows = read_csv_rows(path)
         require_columns(path, fieldnames, MODEL_REQUIRED_COLUMNS)
@@ -274,7 +299,11 @@ def load_models(token: str) -> tuple[list[str], list[dict[str, str]]]:
         for field in fieldnames:
             if field not in output_fields:
                 output_fields.append(field)
-        for row in file_rows:
+        if RESULT_MODEL_ID_COLUMN not in output_fields:
+            output_fields.append(RESULT_MODEL_ID_COLUMN)
+        for source_row in file_rows:
+            row = dict(source_row)
+            row[RESULT_MODEL_ID_COLUMN] = model_identity(path, token, row)
             key = row_key(row)
             if key in seen_keys:
                 raise MergeError(f"Duplicate model row key in {path}: {key}")
@@ -283,17 +312,19 @@ def load_models(token: str) -> tuple[list[str], list[dict[str, str]]]:
     return output_fields, rows
 
 
-def load_grades(token: str) -> dict[tuple[str, str, str, str], dict[str, dict[str, str]]]:
+def load_grades(token: str) -> dict[tuple[str, str, str], dict[str, dict[str, str]]]:
     paths = files_for_split(GRADING_RESULTS_DIR, token)
     if not paths:
         raise MergeError(f"Missing grader result CSVs in {GRADING_RESULTS_DIR} for {split_name(token)}.")
 
-    grades_by_key: dict[tuple[str, str, str, str], dict[str, dict[str, str]]] = defaultdict(dict)
+    grades_by_key: dict[tuple[str, str, str], dict[str, dict[str, str]]] = defaultdict(dict)
     for path in paths:
         fieldnames, rows = read_csv_rows(path)
         require_columns(path, fieldnames, GRADER_REQUIRED_COLUMNS)
         validate_single_split(path, rows, split_name(token))
-        for row in rows:
+        for source_row in rows:
+            row = dict(source_row)
+            row[RESULT_MODEL_ID_COLUMN] = model_identity(path, token, row)
             grader_id = row.get(GRADER_ID_COLUMN, "").strip()
             if not grader_id:
                 raise MergeError(f"{path} contains a row with blank grader_id.")

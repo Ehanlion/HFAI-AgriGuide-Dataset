@@ -10,7 +10,7 @@ ethan vs rachel
   uncertainty_calibration: 0.1235 (linear weighted, n=20)
   decision_support_usefulness: 0.1220 (linear weighted, n=20)
 
-Agreement for model: GPT-5.5 Thinking / model-input-output-instructions-v1
+Agreement for model: gpt-5.5-thinking (GPT-5.5 Thinking / model-input-output-instructions-v1)
 Rows: 20
 ethan vs rachel
   recommendation_correctness: 0.0476 (unweighted, n=20)

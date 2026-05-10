@@ -179,3 +179,138 @@ For `1-5` scale categories, there are two valid options:
 - Use weighted Cohen's kappa if we want near-agreements to count better than far-apart disagreements, such as `4` vs `5` being less severe than `1` vs `5`.
 
 For this project, weighted Cohen's kappa is recommended for the `1-5` rubric columns because those scores are ordered.
+
+## How Expected Agreement Is Calculated
+
+Expected agreement is the amount of agreement we would expect by chance if each grader kept their own scoring habits, but their scores were otherwise unrelated.
+
+This is why kappa can be low even when the grades look close. If both graders mostly use the same small part of the rubric, such as mostly `4` and `5`, the expected chance agreement can already be high.
+
+### Expected Agreement for Unweighted Kappa
+
+For unweighted kappa, expected agreement is calculated from each grader's label counts.
+
+For each possible label:
+
+1. Calculate the proportion of rows where Ethan used that label.
+2. Calculate the proportion of rows where Rachel used that label.
+3. Multiply those two proportions.
+4. Add the products across all labels.
+
+Formula:
+
+`expected agreement = sum(P(Ethan label) * P(Rachel label))`
+
+Example for `recommendation_correctness` with 15 rows:
+
+| Label | Ethan count | Ethan proportion | Rachel count | Rachel proportion | Product |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `correct` | 11 | `11/15` | 11 | `11/15` | `0.5378` |
+| `partially_correct` | 2 | `2/15` | 4 | `4/15` | `0.0356` |
+| `incorrect` | 2 | `2/15` | 0 | `0/15` | `0.0000` |
+
+Expected agreement:
+
+`0.5378 + 0.0356 + 0.0000 = 0.5734`
+
+If observed agreement is `13/15 = 0.8667`, then:
+
+`kappa = (0.8667 - 0.5734) / (1 - 0.5734) = 0.6875`
+
+### Expected Agreement for Weighted Kappa
+
+For weighted kappa, the script uses expected weighted disagreement instead of expected agreement. This is mathematically equivalent for the linear weighted version used here.
+
+The script treats the `1-5` labels as ordered positions:
+
+| Score | Position |
+| --- | ---: |
+| `1` | 0 |
+| `2` | 1 |
+| `3` | 2 |
+| `4` | 3 |
+| `5` | 4 |
+
+The disagreement weight between two scores is:
+
+`distance between scores / maximum distance`
+
+Examples:
+
+| Pair | Distance | Disagreement weight |
+| --- | ---: | ---: |
+| `4` vs `5` | 1 | `1/4 = 0.25` |
+| `3` vs `5` | 2 | `2/4 = 0.50` |
+| `1` vs `5` | 4 | `4/4 = 1.00` |
+
+To calculate expected weighted disagreement:
+
+1. Take every possible Ethan score from `1` to `5`.
+2. Take every possible Rachel score from `1` to `5`.
+3. Multiply Ethan's proportion for that score by Rachel's proportion for that score.
+4. Multiply by the disagreement weight between the two scores.
+5. Add the result across all possible score pairs.
+
+Formula:
+
+`expected weighted disagreement = sum(P(Ethan score) * P(Rachel score) * disagreement weight)`
+
+Then weighted kappa is:
+
+`weighted kappa = 1 - (observed weighted disagreement / expected weighted disagreement)`
+
+For example, if observed weighted disagreement is `0.1667` and expected weighted disagreement is `0.1444`, then:
+
+`weighted kappa = 1 - (0.1667 / 0.1444) = -0.1538`
+
+That negative value does not mean the graders were far apart in absolute terms. It means their observed weighted disagreement was slightly worse than what would be expected from their scoring distributions.
+
+## How to Interpret Kappa Values
+
+Cohen's kappa ranges from `-1` to `1`.
+
+- `1.00`: perfect agreement after accounting for chance.
+- `0.00`: agreement is no better than chance based on the graders' label distributions.
+- Less than `0.00`: agreement is worse than chance, usually a sign that graders are using the rubric inconsistently or that rows were paired incorrectly.
+
+A common interpretation guide is:
+
+| Kappa value | Typical interpretation |
+| --- | --- |
+| `< 0.00` | Poor agreement, worse than chance |
+| `0.00-0.20` | Slight agreement |
+| `0.21-0.40` | Fair agreement |
+| `0.41-0.60` | Moderate agreement |
+| `0.61-0.80` | Substantial agreement |
+| `0.81-1.00` | Almost perfect agreement |
+
+These ranges are only guidelines, not hard rules. Kappa can be lower than expected when one label is very common, even if the raw percent agreement looks high. For this project, review both the kappa value and the actual grading disagreements before deciding whether a rubric category is reliable.
+
+### Unweighted Kappa
+
+Unweighted kappa treats every disagreement as equally wrong.
+
+For `recommendation_correctness`, this means `correct` vs `partially_correct` is counted as a full disagreement, just like `correct` vs `incorrect`. This is appropriate because the category uses named labels rather than an ordered numeric scale.
+
+Use unweighted kappa results to answer:
+
+- Did the graders choose exactly the same category?
+- Are graders applying the categorical fertilizer-correctness labels consistently?
+
+### Weighted Kappa
+
+Weighted kappa gives partial credit for near-agreement on ordered scales.
+
+For the `1-5` rubric columns, `4` vs `5` is treated as a smaller disagreement than `1` vs `5`. This is appropriate for:
+
+- `explanation_relevance`
+- `clarity`
+- `uncertainty_calibration`
+- `decision_support_usefulness`
+
+Use weighted kappa results to answer:
+
+- Are graders making similar judgments even when their exact scores differ by one point?
+- Are disagreements mostly minor score differences, or are graders interpreting the rubric very differently?
+
+Weighted and unweighted kappa values should not be compared as if they are the same measurement. Weighted kappa will often be higher when graders mostly differ by one adjacent score, because those disagreements are intentionally penalized less. If weighted kappa is still low, the graders likely disagree in more substantial ways or use different parts of the scale.

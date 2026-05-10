@@ -21,6 +21,7 @@ RUBRIC_COLUMNS = [
 ]
 MODEL_NAME_COLUMN = "model_name"
 PROMPT_VERSION_COLUMN = "prompt_version"
+RESULT_MODEL_ID_COLUMN = "result_model_id"
 WEIGHTED_RUBRICS = {
     "explanation_relevance",
     "clarity",
@@ -128,11 +129,15 @@ def format_kappa(value: float | None) -> str:
 
 
 def model_group_label(row: dict[str, str]) -> str:
+    result_model_id = row.get(RESULT_MODEL_ID_COLUMN, "").strip()
     model_name = row.get(MODEL_NAME_COLUMN, "").strip() or "unknown_model"
     prompt_version = row.get(PROMPT_VERSION_COLUMN, "").strip()
+    label = model_name
     if prompt_version:
-        return f"{model_name} / {prompt_version}"
-    return model_name
+        label = f"{model_name} / {prompt_version}"
+    if result_model_id and result_model_id != label:
+        return f"{result_model_id} ({label})"
+    return result_model_id or label
 
 
 def append_kappa_section(

@@ -1,0 +1,16 @@
+item_id,split_name,model_name,prompt_version,grader_id,reference_fertilizer,model_fertilizer,recommendation_correctness,explanation_relevance,clarity,uncertainty_calibration,decision_support_usefulness
+FERT-001,split-0-100-subset,gpt-5.5-thinking,model-instructions-v2,rachel,Urea,Urea,correct,4,5,3,5
+FERT-002,split-0-100-subset,gpt-5.5-thinking,model-instructions-v2,rachel,DAP,DAP,correct,4,4,4,4
+FERT-003,split-0-100-subset,gpt-5.5-thinking,model-instructions-v2,rachel,14-35-14,14-35-14,correct,5,5,5,5
+FERT-004,split-0-100-subset,gpt-5.5-thinking,model-instructions-v2,rachel,28-28,20-20,partially_correct,5,5,5,5
+FERT-025,split-0-100-subset,gpt-5.5-thinking,model-instructions-v2,rachel,20-20,DAP,partially_correct,5,5,5,5
+FERT-006,split-0-100-subset,gpt-5.5-thinking,model-instructions-v2,rachel,17-17-17,17-17-17,correct,5,5,5,5
+FERT-069,split-0-100-subset,gpt-5.5-thinking,model-instructions-v2,rachel,10-26-26,10-26-26,correct,5,4,4,5
+FERT-008,split-0-100-subset,gpt-5.5-thinking,model-instructions-v2,rachel,Urea,Urea,correct,4,4,4,5
+FERT-010,split-0-100-subset,gpt-5.5-thinking,model-instructions-v2,rachel,14-35-14,14-35-14,correct,5,4,5,5
+FERT-015,split-0-100-subset,gpt-5.5-thinking,model-instructions-v2,rachel,DAP,DAP,correct,5,5,5,5
+FERT-009,split-0-100-subset,gpt-5.5-thinking,model-instructions-v2,rachel,28-28,20-20,partially_correct,4,5,5,5
+FERT-007,split-0-100-subset,gpt-5.5-thinking,model-instructions-v2,rachel,20-20,DAP,partially_correct,5,4,4,5
+FERT-016,split-0-100-subset,gpt-5.5-thinking,model-instructions-v2,rachel,17-17-17,17-17-17,correct,5,5,5,5
+FERT-079,split-0-100-subset,gpt-5.5-thinking,model-instructions-v2,rachel,10-26-26,10-26-26,correct,5,4,5,5
+FERT-020,split-0-100-subset,gpt-5.5-thinking,model-instructions-v2,rachel,DAP,DAP,correct,5,4,5,5

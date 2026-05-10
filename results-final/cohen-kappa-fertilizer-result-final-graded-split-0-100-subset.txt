@@ -4,17 +4,17 @@ Graders: ethan, rachel
 Overall agreement across all models
 Rows: 15
 ethan vs rachel
-  recommendation_correctness: 0.6429 (unweighted, n=15)
-  explanation_relevance: 0.0000 (linear weighted, n=15)
-  clarity: -0.0000 (linear weighted, n=15)
-  uncertainty_calibration: 0.0000 (linear weighted, n=15)
-  decision_support_usefulness: 0.0000 (linear weighted, n=15)
+  recommendation_correctness: 0.6875 (unweighted, n=15)
+  explanation_relevance: -0.1538 (linear weighted, n=15)
+  clarity: 0.0000 (linear weighted, n=15)
+  uncertainty_calibration: -0.0773 (linear weighted, n=15)
+  decision_support_usefulness: 0.0506 (linear weighted, n=15)
 
-Agreement for model: gpt-5.5-thinking / v1
+Agreement for model: gpt-5.5-thinking-rev2 (gpt-5.5-thinking / model-instructions-v2)
 Rows: 15
 ethan vs rachel
-  recommendation_correctness: 0.6429 (unweighted, n=15)
-  explanation_relevance: 0.0000 (linear weighted, n=15)
-  clarity: -0.0000 (linear weighted, n=15)
-  uncertainty_calibration: 0.0000 (linear weighted, n=15)
-  decision_support_usefulness: 0.0000 (linear weighted, n=15)
+  recommendation_correctness: 0.6875 (unweighted, n=15)
+  explanation_relevance: -0.1538 (linear weighted, n=15)
+  clarity: 0.0000 (linear weighted, n=15)
+  uncertainty_calibration: -0.0773 (linear weighted, n=15)
+  decision_support_usefulness: 0.0506 (linear weighted, n=15)

@@ -28,16 +28,18 @@ Rows are matched by:
 
 - `split_name`
 - `item_id`
-- `model_name`
-- `prompt_version`
+- `result_model_id`, derived from the result filename when it follows `fertilizer-result-<model-id>-split-name.csv`
 
 The merge tool only combines model, grader, and reference rows for the same split. Results from different splits are never merged into the same final file.
+
+Using the filename-derived `result_model_id` keeps model runs separate when the filename includes a version marker that is not present in the CSV's internal `model_name` column, such as `fertilizer-result-gpt-5.5-thinking-rev2-split-0-100-subset.csv`.
 
 ## Included Columns
 
 Each final CSV contains:
 
 - All columns from the model result CSV, including the model response fields.
+- `result_model_id`: the filename model id used to match model rows to grader rows.
 - `actual_fertilizer`: the correct fertilizer copied from `Fertilizer Name` in the matching split's `fertilizer-prediction-test.csv`.
 - `is_model_fertilizer_exact_match`: `true` when `model_fertilizer` exactly matches `actual_fertilizer` after trimming/case normalization, otherwise `false`.
 - One set of grader rubric columns per grader.
@@ -79,6 +81,7 @@ A typical final CSV header for two graders would contain columns like:
 - `Phosphorous`
 - `model_name`
 - `prompt_version`
+- `result_model_id`
 - `model_fertilizer`
 - `explanation`
 - `confidence_statement`
@@ -135,5 +138,6 @@ When a final CSV contains multiple models, the kappa report includes:
 
 - Overall agreement across all model rows.
 - Separate agreement sections for each `model_name` and `prompt_version`.
+- When present, `result_model_id` is used in the section label so filename-level model versions remain visible.
 
 This means a final CSV containing two models and two graders will produce distinct Cohen's kappa scores for each model's graded responses, plus an overall score across both models.
