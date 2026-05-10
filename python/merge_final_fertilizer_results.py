@@ -81,7 +81,21 @@ def write_csv_rows(path: Path, fieldnames: list[str], rows: list[dict[str, str]]
 
 
 def split_token(value: str) -> str | None:
-    match = re.search(r"split-([a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*)(?=\.csv|/|\\|$)", value)
+    normalized = value.replace("\\", "/")
+    dataset_tokens = sorted(
+        (
+            path.name.removeprefix("split-")
+            for path in DATASETS_DIR.glob("split-*")
+            if path.is_dir()
+        ),
+        key=len,
+        reverse=True,
+    )
+    for token in dataset_tokens:
+        if re.search(rf"split-{re.escape(token)}(?=\.csv|/|-|$)", normalized):
+            return token
+
+    match = re.search(r"split-([a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*)(?=\.csv|/|$)", normalized)
     return match.group(1) if match else None
 
 
