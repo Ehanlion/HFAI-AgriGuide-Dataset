@@ -41,68 +41,16 @@ REFERENCE_FERTILIZER_COLUMN = "Fertilizer Name"
 MODEL_FERTILIZER_COLUMN = "model_fertilizer"
 ITEM_ID_COLUMN = "item_id"
 SPLIT_NAME_COLUMN = "split_name"
+RUBRIC_PATH = GUI_DIR / "grading-rubric.json"
 
-RUBRICS = [
-    (
-        "recommendation_correctness",
-        "Recommendation Correctness",
-        [
-            ("correct", "The AI recommends the same fertilizer as the dataset label."),
-            (
-                "partially_correct",
-                "The recommendation has meaningful nutrient overlap or includes the correct fertilizer among multiple options.",
-            ),
-            (
-                "incorrect",
-                "The AI recommends a different fertilizer, gives no usable fertilizer, or conflicts with the dataset label.",
-            ),
-        ],
-    ),
-    (
-        "explanation_relevance",
-        "Explanation Relevance",
-        [
-            ("1", "The explanation is missing, unrelated to the given case, or almost entirely generic."),
-            ("2", "The explanation barely connects to the input or mentions one relevant input with weak reasoning."),
-            ("3", "The explanation uses some relevant inputs, but misses important factors."),
-            ("4", "The explanation uses most important inputs and gives a reasonable fertilizer-specific justification."),
-            ("5", "The explanation clearly connects crop, soil, moisture, temperature/humidity, and nutrients to the recommendation."),
-        ],
-    ),
-    (
-        "clarity",
-        "Interpretability and Clarity",
-        [
-            ("1", "The response is confusing, contradictory, impossible to use, or lacks a clear recommendation."),
-            ("2", "The response has a recommendation, but it is hard to follow or poorly organized."),
-            ("3", "The response is understandable but has some unclear reasoning, vague wording, or unnecessary complexity."),
-            ("4", "The response is clear, organized, and understandable for a non-expert."),
-            ("5", "The response is very clear, concise, and easy for a non-expert to act on responsibly."),
-        ],
-    ),
-    (
-        "uncertainty_calibration",
-        "Uncertainty Calibration",
-        [
-            ("1", "The AI is dangerously overconfident, presents the recommendation as guaranteed, or gives little to no caution."),
-            ("2", "The AI gives weak caution, but still sounds more certain than the dataset supports."),
-            ("3", "The AI includes some uncertainty or verification language, but the caution is limited or generic."),
-            ("4", "The AI recommends clearly while noting that decisions should be verified with soil testing or expertise."),
-            ("5", "The AI balances recommendation and caution very well and explains limits of the data."),
-        ],
-    ),
-    (
-        "decision_support_usefulness",
-        "Decision-Support Usefulness",
-        [
-            ("1", "The response is unusable, actively misleading, or gives very little help."),
-            ("2", "The response has one useful piece of information, but major parts are missing or flawed."),
-            ("3", "The response is somewhat useful, but would require significant outside interpretation."),
-            ("4", "The response is useful and would help a human understand the likely fertilizer choice."),
-            ("5", "The response is highly useful, gives clear reasoning, and includes appropriate caution."),
-        ],
-    ),
+EXPECTED_RUBRIC_COLUMNS = [
+    "recommendation_correctness",
+    "explanation_relevance",
+    "clarity",
+    "uncertainty_calibration",
+    "decision_support_usefulness",
 ]
+RUBRICS: list[tuple[str, str, list[tuple[str, str]]]] = []
 
 REASONING_FIELDS = [
     "explanation",
@@ -175,16 +123,6 @@ QLineEdit, QTextEdit, QTableWidget {
 
 QLineEdit {
     min-height: 34px;
-}
-
-QToolTip {
-    background: {panel};
-    border: 2px solid {border};
-    border-radius: 8px;
-    color: {text};
-    font-size: 32px;
-    font-weight: 700;
-    padding: 12px 16px;
 }
 
 QTextEdit {
@@ -292,11 +230,73 @@ def build_stylesheet(theme: dict[str, str]) -> str:
     return stylesheet
 
 
+def load_rubrics(path: Path = RUBRIC_PATH) -> list[tuple[str, str, list[tuple[str, str]]]]:
+    if not path.exists():
+        raise ValueError(f"Missing rubric file: {path}")
+
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Invalid rubric JSON in {path}: {exc}") from exc
+
+    raw_rubrics = payload.get("rubrics") if isinstance(payload, dict) else None
+    if not isinstance(raw_rubrics, list):
+        raise ValueError(f"{path} must contain a top-level 'rubrics' list.")
+
+    rubrics: list[tuple[str, str, list[tuple[str, str]]]] = []
+    for index, raw_rubric in enumerate(raw_rubrics, start=1):
+        if not isinstance(raw_rubric, dict):
+            raise ValueError(f"Rubric entry {index} in {path} must be an object.")
+
+        column = raw_rubric.get("column")
+        title = raw_rubric.get("title")
+        raw_options = raw_rubric.get("options")
+        if not isinstance(column, str) or not column.strip():
+            raise ValueError(f"Rubric entry {index} in {path} has an invalid column.")
+        if not isinstance(title, str) or not title.strip():
+            raise ValueError(f"Rubric '{column}' in {path} has an invalid title.")
+        if not isinstance(raw_options, list) or not raw_options:
+            raise ValueError(f"Rubric '{column}' in {path} must have at least one option.")
+
+        options: list[tuple[str, str]] = []
+        for option_index, raw_option in enumerate(raw_options, start=1):
+            if not isinstance(raw_option, dict):
+                raise ValueError(f"Option {option_index} for rubric '{column}' must be an object.")
+            label = raw_option.get("label")
+            description = raw_option.get("description")
+            if not isinstance(label, str) or not label.strip():
+                raise ValueError(f"Option {option_index} for rubric '{column}' has an invalid label.")
+            if not isinstance(description, str) or not description.strip():
+                raise ValueError(f"Option '{label}' for rubric '{column}' has an invalid description.")
+            options.append((label, description))
+        rubrics.append((column, title, options))
+
+    columns = [column for column, _title, _options in rubrics]
+    if columns != EXPECTED_RUBRIC_COLUMNS:
+        raise ValueError(
+            f"{path} must define rubric columns in this exact order: "
+            f"{', '.join(EXPECTED_RUBRIC_COLUMNS)}."
+        )
+    return rubrics
+
+
 def ordered_grade_options(column: str, options: list[tuple[str, str]]) -> list[tuple[str, str]]:
     if column == "recommendation_correctness":
         order = {"incorrect": 0, "partially_correct": 1, "correct": 2}
         return sorted(options, key=lambda option: order.get(option[0], len(order)))
     return options
+
+
+def rubric_prompt_html(column: str, title: str, options: list[tuple[str, str]]) -> str:
+    criteria = "".join(
+        f"<li><b>{html.escape(label)}</b>: {html.escape(description)}</li>"
+        for label, description in ordered_grade_options(column, options)
+    )
+    return (
+        f"<div><b>{html.escape(title)}</b>: choose a grade for "
+        f"<b>{html.escape(column)}</b>.</div>"
+        f"<ul style='margin: 8px 0 0 0; text-align: left;'>{criteria}</ul>"
+    )
 
 
 def grade_button_stylesheet(label: str) -> str:
@@ -764,13 +764,12 @@ class GraderWindow(QMainWindow):
         self.clear_layout(self.button_row)
         self.clear_layout(self.confirm_row)
         column, title, options = RUBRICS[self.current_rubric_index]
-        self.prompt_label.setText(f"<b>{title}</b>: choose a grade for <b>{column}</b>.")
+        self.prompt_label.setText(rubric_prompt_html(column, title, options))
         self.button_row.addStretch()
-        for label, tooltip in ordered_grade_options(column, options):
+        for label, _description in ordered_grade_options(column, options):
             button = QPushButton(label)
             button.setProperty("role", "grade")
             button.setStyleSheet(grade_button_stylesheet(label))
-            button.setToolTip(tooltip)
             button.clicked.connect(lambda _checked=False, value=label: self.record_grade(value))
             self.button_row.addWidget(button)
         self.button_row.addStretch()
@@ -846,8 +845,14 @@ class GraderWindow(QMainWindow):
 
 
 def main() -> None:
+    global RUBRICS
     app = QApplication(sys.argv)
     app.setFont(QFont("Segoe UI", 12))
+    try:
+        RUBRICS = load_rubrics()
+    except ValueError as exc:
+        QMessageBox.critical(None, "Rubric Load Error", str(exc))
+        sys.exit(1)
     window = GraderWindow()
     window.show()
     sys.exit(app.exec())

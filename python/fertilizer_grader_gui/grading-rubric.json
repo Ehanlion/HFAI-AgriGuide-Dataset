@@ -1,0 +1,127 @@
+{
+  "version": "evidence-based-v1",
+  "rubrics": [
+    {
+      "column": "recommendation_correctness",
+      "title": "Recommendation Correctness",
+      "options": [
+        {
+          "label": "correct",
+          "description": "The model's primary fertilizer exactly matches the reference label for this row."
+        },
+        {
+          "label": "partially_correct",
+          "description": "The model misses the exact label but has meaningful N-P-K overlap with the reference source, or includes the reference fertilizer among multiple usable choices."
+        },
+        {
+          "label": "incorrect",
+          "description": "The model recommends a different fertilizer class, gives no usable fertilizer, invents a fertilizer outside the allowed set, or contradicts the reference label."
+        }
+      ]
+    },
+    {
+      "column": "explanation_relevance",
+      "title": "Explanation Relevance",
+      "options": [
+        {
+          "label": "1",
+          "description": "Missing, unrelated, or generic explanation; does not use the row's crop, soil, environmental, or nutrient values."
+        },
+        {
+          "label": "2",
+          "description": "Mentions one relevant input but gives weak or mostly generic reasoning that could fit many rows."
+        },
+        {
+          "label": "3",
+          "description": "Uses some row inputs, usually N-P-K or crop, but misses important available evidence or leaves the fertilizer link vague."
+        },
+        {
+          "label": "4",
+          "description": "Uses most important row inputs and gives a fertilizer-specific justification grounded in nutrient source fit and crop or soil context."
+        },
+        {
+          "label": "5",
+          "description": "Clearly connects crop, soil type, moisture/temperature/humidity, and N-P-K values to the selected fertilizer using source-fit reasoning."
+        }
+      ]
+    },
+    {
+      "column": "clarity",
+      "title": "Interpretability and Clarity",
+      "options": [
+        {
+          "label": "1",
+          "description": "Confusing, contradictory, or missing a clear recommendation; a grader cannot tell what action is being suggested."
+        },
+        {
+          "label": "2",
+          "description": "Contains a recommendation but is hard to follow, poorly organized, or obscured by jargon."
+        },
+        {
+          "label": "3",
+          "description": "Understandable overall, but includes vague wording, unnecessary complexity, or minor internal inconsistency."
+        },
+        {
+          "label": "4",
+          "description": "Clear, organized, concise, and understandable to a non-expert grader."
+        },
+        {
+          "label": "5",
+          "description": "Very clear and concise; separates recommendation, evidence, confidence, and caution so a human can interpret it responsibly."
+        }
+      ]
+    },
+    {
+      "column": "uncertainty_calibration",
+      "title": "Uncertainty Calibration",
+      "options": [
+        {
+          "label": "1",
+          "description": "Dangerously overconfident; presents the output as guaranteed agronomic advice or omits caution for field use."
+        },
+        {
+          "label": "2",
+          "description": "Adds weak caution but still implies more certainty than the limited benchmark row supports."
+        },
+        {
+          "label": "3",
+          "description": "Includes some uncertainty or verification language, but it is generic or not tied to missing field evidence."
+        },
+        {
+          "label": "4",
+          "description": "Gives a clear recommendation while noting that real fertilizer decisions should be checked with soil testing, local guidance, crop stage, or field conditions."
+        },
+        {
+          "label": "5",
+          "description": "Balances recommendation and caution very well; explains limits of the dataset and avoids encouraging overreliance on the AI answer."
+        }
+      ]
+    },
+    {
+      "column": "decision_support_usefulness",
+      "title": "Decision-Support Usefulness",
+      "options": [
+        {
+          "label": "1",
+          "description": "Unusable or actively misleading for human decision support."
+        },
+        {
+          "label": "2",
+          "description": "Contains one useful detail but major evidence, caution, or recommendation quality is missing or flawed."
+        },
+        {
+          "label": "3",
+          "description": "Somewhat useful, but a human would need substantial outside interpretation to understand or safely use the answer."
+        },
+        {
+          "label": "4",
+          "description": "Useful decision support: the answer states the fertilizer, gives relevant row-based reasoning, and includes appropriate verification cautions."
+        },
+        {
+          "label": "5",
+          "description": "Highly useful decision support: integrates label correctness, N-P-K source fit, case-specific reasoning, clear wording, and calibrated caution."
+        }
+      ]
+    }
+  ]
+}

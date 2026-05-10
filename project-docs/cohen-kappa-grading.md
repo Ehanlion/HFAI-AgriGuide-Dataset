@@ -2,6 +2,8 @@
 
 This document defines the human grading rubric for AgriGuide AI fertilizer recommendation responses and explains how to structure the grades so Cohen's kappa can be calculated cleanly.
 
+The evidence-based grading anchors are maintained in `project-docs/grading-rubric.md`, and the GUI loads the matching machine-readable options from `python/fertilizer_grader_gui/grading-rubric.json`. Keep the column names and allowed labels in those files aligned with the columns below.
+
 ## Core Rule
 
 It is okay to mix label styles across different rubric categories.
