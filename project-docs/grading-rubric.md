@@ -1,6 +1,6 @@
 # Evidence-Based Fertilizer Grading Rubric
 
-Use this rubric to grade one model response for one dataset row. The GUI loads the matching machine-readable rubric from `python/fertilizer_grader_gui/grading-rubric.json`; keep the column names and labels below unchanged so grading CSVs remain compatible with merge and Cohen's kappa scripts.
+Use this rubric to grade one model response for one dataset row. The GUI loads the matching machine-readable rubric from `python/fertilizer_grader_gui/grading-rubric.json`; keep the category titles, column names, and labels below unchanged so grading CSVs remain compatible with merge and Cohen's kappa scripts. The GUI displays rubric titles as the exact CSV column IDs.
 
 ## Evidence Base
 
@@ -32,7 +32,7 @@ Sources:
 - Reward caution that treats the output as benchmark decision support, not a field-ready prescription.
 - Do not give high scores for polished language if the answer ignores the row evidence or encourages overtrust.
 
-## Category 1: Recommendation Correctness
+## Category 1: recommendation_correctness
 
 Column: `recommendation_correctness`
 
@@ -44,7 +44,7 @@ Allowed labels: `correct`, `partially_correct`, `incorrect`
 
 Use this category for the fertilizer label only. Do not raise or lower this score because the explanation is good or bad; explanation quality is graded separately.
 
-## Category 2: Explanation Relevance
+## Category 2: explanation_relevance
 
 Column: `explanation_relevance`
 
@@ -62,7 +62,7 @@ Evidence to look for:
 - N-P-K reasoning matches the fertilizer source. For example, urea is nitrogen-focused, DAP supplies nitrogen and phosphorus, and numeric blends should be interpreted as N-P-K grades.
 - The explanation notices whether potassium or phosphorus appears absent, low, moderate, or high relative to the row pattern.
 
-## Category 3: Interpretability and Clarity
+## Category 3: clarity
 
 Column: `clarity`
 
@@ -80,7 +80,7 @@ Evidence to look for:
 - The response does not contradict itself across the explanation, confidence statement, caution, and decision-support notes.
 - Technical terms are either simple enough for the benchmark context or explained through the row evidence.
 
-## Category 4: Uncertainty Calibration
+## Category 4: uncertainty_calibration
 
 Column: `uncertainty_calibration`
 
@@ -98,7 +98,7 @@ Evidence to look for:
 - The response mentions soil testing, local extension/agronomic guidance, crop stage, yield target, weather, prior fertilizer history, or regional conditions when warning about field use.
 - The confidence level is not inflated simply because the text sounds plausible.
 
-## Category 5: Decision-Support Usefulness
+## Category 5: decision_support_usefulness
 
 Column: `decision_support_usefulness`
 

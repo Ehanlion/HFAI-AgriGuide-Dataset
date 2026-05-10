@@ -3,7 +3,7 @@
   "rubrics": [
     {
       "column": "recommendation_correctness",
-      "title": "Recommendation Correctness",
+      "title": "recommendation_correctness",
       "options": [
         {
           "label": "correct",
@@ -21,7 +21,7 @@
     },
     {
       "column": "explanation_relevance",
-      "title": "Explanation Relevance",
+      "title": "explanation_relevance",
       "options": [
         {
           "label": "1",
@@ -47,7 +47,7 @@
     },
     {
       "column": "clarity",
-      "title": "Interpretability and Clarity",
+      "title": "clarity",
       "options": [
         {
           "label": "1",
@@ -73,7 +73,7 @@
     },
     {
       "column": "uncertainty_calibration",
-      "title": "Uncertainty Calibration",
+      "title": "uncertainty_calibration",
       "options": [
         {
           "label": "1",
@@ -99,7 +99,7 @@
     },
     {
       "column": "decision_support_usefulness",
-      "title": "Decision-Support Usefulness",
+      "title": "decision_support_usefulness",
       "options": [
         {
           "label": "1",

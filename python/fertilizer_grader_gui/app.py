@@ -42,6 +42,7 @@ MODEL_FERTILIZER_COLUMN = "model_fertilizer"
 ITEM_ID_COLUMN = "item_id"
 SPLIT_NAME_COLUMN = "split_name"
 RUBRIC_PATH = GUI_DIR / "grading-rubric.json"
+FERTILIZER_REFERENCE_PATH = GUI_DIR / "fertilizer-reference.json"
 
 EXPECTED_RUBRIC_COLUMNS = [
     "recommendation_correctness",
@@ -51,6 +52,7 @@ EXPECTED_RUBRIC_COLUMNS = [
     "decision_support_usefulness",
 ]
 RUBRICS: list[tuple[str, str, list[tuple[str, str]]]] = []
+FERTILIZER_REFERENCE: dict[str, dict[str, list[str] | str]] = {}
 
 REASONING_FIELDS = [
     "explanation",
@@ -58,6 +60,33 @@ REASONING_FIELDS = [
     "uncertainty_or_caution",
     "decision_support_notes",
 ]
+RUBRIC_HIGHLIGHT_FIELDS = {
+    "recommendation_correctness": {
+        "model": [MODEL_FERTILIZER_COLUMN],
+        "reference": [REFERENCE_FERTILIZER_COLUMN],
+        "reasoning": [],
+    },
+    "explanation_relevance": {
+        "model": [],
+        "reference": [],
+        "reasoning": ["explanation"],
+    },
+    "clarity": {
+        "model": [],
+        "reference": [],
+        "reasoning": REASONING_FIELDS,
+    },
+    "uncertainty_calibration": {
+        "model": [],
+        "reference": [],
+        "reasoning": ["confidence_statement", "uncertainty_or_caution"],
+    },
+    "decision_support_usefulness": {
+        "model": [],
+        "reference": [],
+        "reasoning": ["decision_support_notes"],
+    },
+}
 
 THEMES = {
     "light": {
@@ -255,6 +284,8 @@ def load_rubrics(path: Path = RUBRIC_PATH) -> list[tuple[str, str, list[tuple[st
             raise ValueError(f"Rubric entry {index} in {path} has an invalid column.")
         if not isinstance(title, str) or not title.strip():
             raise ValueError(f"Rubric '{column}' in {path} has an invalid title.")
+        if title != column:
+            raise ValueError(f"Rubric '{column}' in {path} must use the column name as its title.")
         if not isinstance(raw_options, list) or not raw_options:
             raise ValueError(f"Rubric '{column}' in {path} must have at least one option.")
 
@@ -280,6 +311,44 @@ def load_rubrics(path: Path = RUBRIC_PATH) -> list[tuple[str, str, list[tuple[st
     return rubrics
 
 
+def load_fertilizer_reference(path: Path = FERTILIZER_REFERENCE_PATH) -> dict[str, dict[str, list[str] | str]]:
+    if not path.exists():
+        raise ValueError(f"Missing fertilizer reference file: {path}")
+
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Invalid fertilizer reference JSON in {path}: {exc}") from exc
+
+    raw_fertilizers = payload.get("fertilizers") if isinstance(payload, dict) else None
+    if not isinstance(raw_fertilizers, list) or not raw_fertilizers:
+        raise ValueError(f"{path} must contain a top-level 'fertilizers' list.")
+
+    reference: dict[str, dict[str, list[str] | str]] = {}
+    for index, raw_fertilizer in enumerate(raw_fertilizers, start=1):
+        if not isinstance(raw_fertilizer, dict):
+            raise ValueError(f"Fertilizer entry {index} in {path} must be an object.")
+        name = raw_fertilizer.get("name")
+        grade = raw_fertilizer.get("grade")
+        nutrients = raw_fertilizer.get("nutrients")
+        uses = raw_fertilizer.get("uses")
+        grading_notes = raw_fertilizer.get("grading_notes")
+        if not isinstance(name, str) or not name.strip():
+            raise ValueError(f"Fertilizer entry {index} in {path} has an invalid name.")
+        if not isinstance(grade, str):
+            raise ValueError(f"Fertilizer '{name}' in {path} has an invalid grade.")
+        for field_name, value in (("nutrients", nutrients), ("uses", uses), ("grading_notes", grading_notes)):
+            if not isinstance(value, list) or not all(isinstance(item, str) and item.strip() for item in value):
+                raise ValueError(f"Fertilizer '{name}' in {path} has invalid {field_name}.")
+        reference[name.strip()] = {
+            "grade": grade,
+            "nutrients": nutrients,
+            "uses": uses,
+            "grading_notes": grading_notes,
+        }
+    return reference
+
+
 def ordered_grade_options(column: str, options: list[tuple[str, str]]) -> list[tuple[str, str]]:
     if column == "recommendation_correctness":
         order = {"incorrect": 0, "partially_correct": 1, "correct": 2}
@@ -287,14 +356,13 @@ def ordered_grade_options(column: str, options: list[tuple[str, str]]) -> list[t
     return options
 
 
-def rubric_prompt_html(column: str, title: str, options: list[tuple[str, str]]) -> str:
+def rubric_prompt_html(column: str, options: list[tuple[str, str]]) -> str:
     criteria = "".join(
         f"<li><b>{html.escape(label)}</b>: {html.escape(description)}</li>"
         for label, description in ordered_grade_options(column, options)
     )
     return (
-        f"<div><b>{html.escape(title)}</b>: choose a grade for "
-        f"<b>{html.escape(column)}</b>.</div>"
+        f"<div><b>{html.escape(column)}</b>: choose a grade.</div>"
         f"<ul style='margin: 8px 0 0 0; text-align: left;'>{criteria}</ul>"
     )
 
@@ -402,21 +470,28 @@ class KeyValueTable(QTableWidget):
             "QTableWidget::item { padding: 6px; }"
         )
 
-    def set_mapping(self, values: dict[str, str], fields: list[str] | None = None) -> None:
+    def set_mapping(
+        self,
+        values: dict[str, str],
+        fields: list[str] | None = None,
+        highlighted_fields: set[str] | None = None,
+    ) -> None:
         names = fields or list(values.keys())
+        highlights = highlighted_fields or set()
         self.setRowCount(len(names))
         for row_index, field in enumerate(names):
+            is_highlighted = field in highlights
             field_item = QTableWidgetItem(field)
             field_font = QFont()
             field_font.setBold(True)
             field_item.setFont(field_font)
-            field_item.setForeground(QBrush(QColor(self.theme["field_text"])))
-            field_item.setBackground(QBrush(QColor(self.theme["field_bg"])))
+            field_item.setForeground(QBrush(QColor("#1f241f" if is_highlighted else self.theme["field_text"])))
+            field_item.setBackground(QBrush(QColor("#f4d35e" if is_highlighted else self.theme["field_bg"])))
             self.setItem(row_index, 0, field_item)
 
             value_item = QTableWidgetItem(values.get(field, ""))
-            value_item.setForeground(QBrush(QColor(self.theme["text"])))
-            value_item.setBackground(QBrush(QColor(self.theme["panel"])))
+            value_item.setForeground(QBrush(QColor("#1f241f" if is_highlighted else self.theme["text"])))
+            value_item.setBackground(QBrush(QColor("#fff1a8" if is_highlighted else self.theme["panel"])))
             self.setItem(row_index, 1, value_item)
         self.resizeRowsToContents()
 
@@ -438,6 +513,7 @@ class GraderWindow(QMainWindow):
         self.completed_rows: list[dict[str, str]] = []
         self.current_index = 0
         self.current_rubric_index = 0
+        self.active_rubric_column: str | None = None
         self.current_grades: dict[str, str] = {}
         self.editing_existing_grade = False
 
@@ -513,10 +589,23 @@ class GraderWindow(QMainWindow):
         self.review_table.hide()
         self.confirm_row = QHBoxLayout()
         self.confirm_row.setSpacing(10)
-        self.grading_layout.addWidget(self.prompt_label)
-        self.grading_layout.addLayout(self.button_row)
-        self.grading_layout.addWidget(self.review_table)
-        self.grading_layout.addLayout(self.confirm_row)
+        self.fertilizer_reference_view = QTextEdit()
+        self.fertilizer_reference_view.setReadOnly(True)
+        self.fertilizer_reference_view.setMinimumWidth(380)
+        self.fertilizer_reference_view.hide()
+
+        grading_content = QHBoxLayout()
+        grading_left = QWidget()
+        grading_left_layout = QVBoxLayout(grading_left)
+        grading_left_layout.setContentsMargins(0, 0, 0, 0)
+        grading_left_layout.setSpacing(14)
+        grading_left_layout.addWidget(self.prompt_label)
+        grading_left_layout.addLayout(self.button_row)
+        grading_left_layout.addWidget(self.review_table)
+        grading_left_layout.addLayout(self.confirm_row)
+        grading_content.addWidget(grading_left, stretch=2)
+        grading_content.addWidget(self.fertilizer_reference_view, stretch=1)
+        self.grading_layout.addLayout(grading_content)
         layout.addWidget(self.grading_box)
         self.load_gui_state()
         self.apply_theme(self.theme_name)
@@ -585,7 +674,7 @@ class GraderWindow(QMainWindow):
         self.model_table.apply_theme(theme)
         self.reference_table.apply_theme(theme)
         self.review_table.apply_theme(theme)
-        self.refresh_reasoning_view()
+        self.refresh_display_highlights()
 
     def toggle_theme(self) -> None:
         self.apply_theme("dark" if self.theme_name == "light" else "light")
@@ -677,6 +766,7 @@ class GraderWindow(QMainWindow):
         self.current_grades = {}
         self.editing_existing_grade = False
         self.current_rubric_index = 0
+        self.active_rubric_column = None
         model_row = self.model_rows[self.current_index]
         reference_row = self.reference_rows_by_key[self.row_key(model_row)]
         self.model_table.set_mapping(
@@ -691,22 +781,149 @@ class GraderWindow(QMainWindow):
         )
         self.show_rubric_prompt()
 
+    def active_highlight_fields(self) -> dict[str, list[str]]:
+        if self.active_rubric_column is None:
+            return {"model": [], "reference": [], "reasoning": []}
+        return RUBRIC_HIGHLIGHT_FIELDS.get(self.active_rubric_column, {"model": [], "reference": [], "reasoning": []})
+
+    def refresh_display_highlights(self) -> None:
+        if not self.model_rows or self.current_index >= len(self.model_rows):
+            return
+
+        model_row = self.model_rows[self.current_index]
+        reference_row = self.reference_rows_by_key[self.row_key(model_row)]
+        highlights = self.active_highlight_fields()
+        self.model_table.set_mapping(
+            model_row,
+            [field for field in model_row if field not in REASONING_FIELDS],
+            set(highlights["model"]),
+        )
+        self.reference_table.set_mapping(reference_row, highlighted_fields=set(highlights["reference"]))
+        self.refresh_reasoning_view()
+        self.refresh_fertilizer_reference_view()
+
+    def fertilizer_reference_card_html(self, role: str, name: str, theme: dict[str, str]) -> str:
+        fertilizer = FERTILIZER_REFERENCE.get(name)
+        if fertilizer is None:
+            details = "<div class='fertilizer-line'>No reference note is available.</div>"
+        else:
+            grade = html.escape(str(fertilizer["grade"]))
+            nutrients = html.escape("; ".join(str(item) for item in fertilizer["nutrients"]))
+            uses = html.escape("; ".join(str(item) for item in fertilizer["uses"]))
+            notes = html.escape("; ".join(str(item) for item in fertilizer["grading_notes"]))
+            details = (
+                f"<div class='fertilizer-line'><b>Grade:</b> {grade}</div>"
+                f"<div class='fertilizer-line'><b>Nutrients:</b> {nutrients}</div>"
+                f"<div class='fertilizer-line'><b>Use:</b> {uses}</div>"
+                f"<div class='fertilizer-line'><b>Cues:</b> {notes}</div>"
+            )
+        return (
+            "<td class='fertilizer-card'>"
+            f"<div class='fertilizer-role'>{html.escape(role)}</div>"
+            f"<div class='fertilizer-name'>{html.escape(name or 'missing')}</div>"
+            f"{details}"
+            "</td>"
+        )
+
+    def refresh_fertilizer_reference_view(self) -> None:
+        if not self.model_rows or self.current_index >= len(self.model_rows):
+            self.fertilizer_reference_view.hide()
+            return
+
+        if self.active_rubric_column != "recommendation_correctness":
+            self.fertilizer_reference_view.hide()
+            return
+
+        model_row = self.model_rows[self.current_index]
+        reference_row = self.reference_rows_by_key[self.row_key(model_row)]
+        model_fertilizer = model_row.get(MODEL_FERTILIZER_COLUMN, "").strip()
+        reference_fertilizer = reference_row.get(REFERENCE_FERTILIZER_COLUMN, "").strip()
+        theme = THEMES[self.theme_name]
+        cards = "".join([
+            self.fertilizer_reference_card_html("reference", reference_fertilizer, theme),
+            self.fertilizer_reference_card_html("model", model_fertilizer, theme),
+        ])
+        self.fertilizer_reference_view.setHtml(
+            f"""
+            <html>
+            <head>
+            <style>
+                body {{
+                    background: {theme["panel"]};
+                    color: {theme["text"]};
+                    font-family: Segoe UI, Arial, sans-serif;
+                    font-size: 13px;
+                    line-height: 1.18;
+                    margin: 0;
+                }}
+                .fertilizer-grid {{
+                    width: 100%;
+                }}
+                .fertilizer-card {{
+                    border: 2px solid {theme["border"]};
+                    border-radius: 6px;
+                    margin: 0 8px 0 0;
+                    padding: 7px;
+                    vertical-align: top;
+                    width: 50%;
+                }}
+                .fertilizer-role {{
+                    background: {theme["reasoning_heading_bg"]};
+                    color: {theme["reasoning_heading_text"]};
+                    font-weight: 800;
+                    padding: 3px 5px;
+                    margin-bottom: 4px;
+                }}
+                .fertilizer-name {{
+                    color: {theme["text"]};
+                    font-size: 18px;
+                    font-weight: 900;
+                    margin-bottom: 5px;
+                }}
+                .fertilizer-line {{
+                    margin: 3px 0;
+                }}
+            </style>
+            </head>
+            <body><table class='fertilizer-grid'><tr>{cards}</tr></table></body>
+            </html>
+            """
+        )
+        self.fertilizer_reference_view.show()
+
     def refresh_reasoning_view(self) -> None:
         if not self.model_rows or self.current_index >= len(self.model_rows):
             return
 
         model_row = self.model_rows[self.current_index]
         theme = THEMES[self.theme_name]
+        if self.theme_name == "dark":
+            highlight_bg = "#284b35"
+            highlight_border = "#f4d35e"
+            highlight_title_bg = "#f4d35e"
+            highlight_title_border = "#c99f23"
+            highlight_text = "#f4fff2"
+            highlight_title_text = "#111711"
+        else:
+            highlight_bg = "#fff6c7"
+            highlight_border = "#d7ad2f"
+            highlight_title_bg = "#f4d35e"
+            highlight_title_border = "#c99f23"
+            highlight_text = "#1f241f"
+            highlight_title_text = "#1f241f"
+        highlighted_reasoning_fields = set(self.active_highlight_fields()["reasoning"])
         sections = []
         for field in REASONING_FIELDS:
             if field not in model_row:
                 continue
-            title = html.escape(field.replace("_", " ").title())
+            title = html.escape(field)
             value = html.escape(model_row.get(field, "")).replace("\n", "<br>")
+            section_class = "reasoning-section highlighted" if field in highlighted_reasoning_fields else "reasoning-section"
+            body_class = "reasoning-body highlighted-body" if field in highlighted_reasoning_fields else "reasoning-body"
             sections.append(
-                "<section>"
+                f"<section class='{section_class}'>"
                 f"<div class='reasoning-title'>{title}</div>"
-                f"<div class='reasoning-body'>{value}</div>"
+                f"<div class='{body_class}'>{value}</div>"
                 "</section>"
             )
 
@@ -723,8 +940,15 @@ class GraderWindow(QMainWindow):
                     line-height: 1.35;
                     margin: 0;
                 }}
-                section {{
+                .reasoning-section {{
                     margin: 0 0 18px 0;
+                    border: 2px solid transparent;
+                    border-radius: 8px;
+                    padding: 6px;
+                }}
+                .highlighted {{
+                    border-color: {highlight_border};
+                    color: {highlight_text};
                 }}
                 .reasoning-title {{
                     background: {theme["reasoning_heading_bg"]};
@@ -738,6 +962,19 @@ class GraderWindow(QMainWindow):
                 }}
                 .reasoning-body {{
                     padding: 2px 4px 0 4px;
+                    color: {theme["text"]};
+                }}
+                .highlighted .reasoning-title {{
+                    background: {highlight_title_bg};
+                    border-color: {highlight_title_border};
+                    color: {highlight_title_text};
+                }}
+                .highlighted-body {{
+                    background: {highlight_bg};
+                    border-left: 6px solid {highlight_border};
+                    border-radius: 6px;
+                    color: {highlight_text};
+                    padding: 10px 12px;
                 }}
             </style>
             </head>
@@ -764,7 +1001,9 @@ class GraderWindow(QMainWindow):
         self.clear_layout(self.button_row)
         self.clear_layout(self.confirm_row)
         column, title, options = RUBRICS[self.current_rubric_index]
-        self.prompt_label.setText(rubric_prompt_html(column, title, options))
+        self.active_rubric_column = column
+        self.refresh_display_highlights()
+        self.prompt_label.setText(rubric_prompt_html(column, options))
         self.button_row.addStretch()
         for label, _description in ordered_grade_options(column, options):
             button = QPushButton(label)
@@ -791,6 +1030,8 @@ class GraderWindow(QMainWindow):
     def show_confirmation(self) -> None:
         self.clear_layout(self.button_row)
         self.clear_layout(self.confirm_row)
+        self.active_rubric_column = None
+        self.refresh_display_highlights()
         self.prompt_label.setText("<b>Review grades</b> before confirming this item.")
         self.review_table.set_mapping(self.current_grades, [rubric[0] for rubric in RUBRICS])
         self.review_table.show()
@@ -845,13 +1086,14 @@ class GraderWindow(QMainWindow):
 
 
 def main() -> None:
-    global RUBRICS
+    global FERTILIZER_REFERENCE, RUBRICS
     app = QApplication(sys.argv)
     app.setFont(QFont("Segoe UI", 12))
     try:
         RUBRICS = load_rubrics()
+        FERTILIZER_REFERENCE = load_fertilizer_reference()
     except ValueError as exc:
-        QMessageBox.critical(None, "Rubric Load Error", str(exc))
+        QMessageBox.critical(None, "Configuration Load Error", str(exc))
         sys.exit(1)
     window = GraderWindow()
     window.show()

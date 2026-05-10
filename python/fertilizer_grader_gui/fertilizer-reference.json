@@ -1,0 +1,115 @@
+{
+  "version": "fertilizer-reference-v1",
+  "fertilizers": [
+    {
+      "name": "Urea",
+      "grade": "commonly around 46-0-0",
+      "nutrients": [
+        "High nitrogen",
+        "Little to no phosphorus or potassium"
+      ],
+      "uses": [
+        "Nitrogen-focused correction when crops need leaf and stem growth support"
+      ],
+      "grading_notes": [
+        "Compare against recommendations that primarily address nitrogen",
+        "Weak overlap with fertilizers selected for phosphorus or potassium support"
+      ]
+    },
+    {
+      "name": "DAP",
+      "grade": "commonly around 18-46-0",
+      "nutrients": [
+        "Nitrogen plus high phosphorus",
+        "No potassium"
+      ],
+      "uses": [
+        "Phosphorus support for root development, early growth, flowering, or seed formation while adding some nitrogen"
+      ],
+      "grading_notes": [
+        "Meaningful overlap with recommendations that supply nitrogen and phosphorus",
+        "Weak overlap with potassium-containing blends when potassium is central"
+      ]
+    },
+    {
+      "name": "14-35-14",
+      "grade": "14-35-14",
+      "nutrients": [
+        "14% nitrogen",
+        "35% phosphorus",
+        "14% potassium"
+      ],
+      "uses": [
+        "Strong phosphorus support when some nitrogen and potassium are also useful"
+      ],
+      "grading_notes": [
+        "Overlaps with phosphorus-heavy fertilizers and mixed N-P-K blends",
+        "Stronger match when the explanation calls for phosphorus plus some potassium"
+      ]
+    },
+    {
+      "name": "28-28",
+      "grade": "28-28",
+      "nutrients": [
+        "About 28% nitrogen",
+        "About 28% phosphorus",
+        "Little or no potassium in this dataset context"
+      ],
+      "uses": [
+        "Higher nitrogen-phosphorus support when potassium is not the main concern"
+      ],
+      "grading_notes": [
+        "Overlaps with two-nutrient N-P fertilizers such as 20-20",
+        "Weaker match when potassium support is needed"
+      ]
+    },
+    {
+      "name": "17-17-17",
+      "grade": "17-17-17",
+      "nutrients": [
+        "17% nitrogen",
+        "17% phosphorus",
+        "17% potassium"
+      ],
+      "uses": [
+        "General-purpose balanced support across growth, root development, flowering, and plant strength"
+      ],
+      "grading_notes": [
+        "Overlaps with mixed N-P-K fertilizers",
+        "Best match when all three major nutrients are relevant rather than one nutrient dominating"
+      ]
+    },
+    {
+      "name": "20-20",
+      "grade": "20-20",
+      "nutrients": [
+        "About 20% nitrogen",
+        "About 20% phosphorus",
+        "Little or no potassium in this dataset context"
+      ],
+      "uses": [
+        "Moderate nitrogen-phosphorus support when potassium is not the priority"
+      ],
+      "grading_notes": [
+        "Overlaps with 28-28, but is less concentrated",
+        "Weaker match for cases requiring potassium"
+      ]
+    },
+    {
+      "name": "10-26-26",
+      "grade": "10-26-26",
+      "nutrients": [
+        "10% nitrogen",
+        "26% phosphorus",
+        "26% potassium"
+      ],
+      "uses": [
+        "Root, flowering, fruiting, or plant-strength support where phosphorus and potassium matter more than nitrogen"
+      ],
+      "grading_notes": [
+        "Overlaps with mixed N-P-K fertilizers and P-K-forward reasoning",
+        "Weak match when nitrogen-only support is the central need"
+      ]
+    }
+  ]
+}

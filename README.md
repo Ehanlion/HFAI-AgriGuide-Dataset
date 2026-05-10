@@ -104,6 +104,8 @@ Use `project-docs/model-output-instructions.md` when asking a model to return fe
 
 Use `project-docs/grading-rubric.md` for the evidence-based human grading rubric. The grader GUI loads the matching rubric options from `python/fertilizer_grader_gui/grading-rubric.json` and uses text labels for recommendation correctness plus 1-to-5 numeric ratings for explanation relevance, clarity, uncertainty calibration, and decision-support usefulness. Its grading CSVs can be compared between graders for Cohen's kappa calculations.
 
+Use `project-docs/fertilizer-reference.md` for the focused fertilizer notes shown while grading `recommendation_correctness`. The grader GUI loads the matching reference data from `python/fertilizer_grader_gui/fertilizer-reference.json` and displays notes for both the reference fertilizer and the model-predicted fertilizer.
+
 Recommended grading outputs belong in `results-grading/`.
 
 Recommended model outputs belong in `results-model/`.

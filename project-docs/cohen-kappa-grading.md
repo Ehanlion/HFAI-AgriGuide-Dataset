@@ -34,7 +34,7 @@ The fields `item_id`, `split_name`, `model_name`, and `prompt_version` are what 
 
 ## Rubric Columns
 
-### Recommendation Correctness
+### recommendation_correctness
 
 Column name:
 
@@ -54,7 +54,7 @@ Breakdown:
 
 Use this category to evaluate whether the model got the main fertilizer recommendation right.
 
-### Explanation Relevance
+### explanation_relevance
 
 Column name:
 
@@ -78,7 +78,7 @@ Breakdown:
 
 Use this category to evaluate whether the model explains the recommendation using the actual dataset fields instead of giving generic fertilizer advice.
 
-### Interpretability and Clarity
+### clarity
 
 Column name:
 
@@ -102,7 +102,7 @@ Breakdown:
 
 Use this category to evaluate whether the response is understandable to a human decision-maker.
 
-### Uncertainty Calibration
+### uncertainty_calibration
 
 Column name:
 
@@ -126,7 +126,7 @@ Breakdown:
 
 Use this category to evaluate whether the model's confidence level is responsible for a decision-support setting.
 
-### Decision-Support Usefulness
+### decision_support_usefulness
 
 Column name:
 
