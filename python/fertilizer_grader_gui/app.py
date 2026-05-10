@@ -810,12 +810,10 @@ class GraderWindow(QMainWindow):
             grade = html.escape(str(fertilizer["grade"]))
             nutrients = html.escape("; ".join(str(item) for item in fertilizer["nutrients"]))
             uses = html.escape("; ".join(str(item) for item in fertilizer["uses"]))
-            notes = html.escape("; ".join(str(item) for item in fertilizer["grading_notes"]))
             details = (
                 f"<div class='fertilizer-line'><b>Grade:</b> {grade}</div>"
                 f"<div class='fertilizer-line'><b>Nutrients:</b> {nutrients}</div>"
                 f"<div class='fertilizer-line'><b>Use:</b> {uses}</div>"
-                f"<div class='fertilizer-line'><b>Cues:</b> {notes}</div>"
             )
         return (
             "<td class='fertilizer-card'>"
@@ -840,8 +838,8 @@ class GraderWindow(QMainWindow):
         reference_fertilizer = reference_row.get(REFERENCE_FERTILIZER_COLUMN, "").strip()
         theme = THEMES[self.theme_name]
         cards = "".join([
-            self.fertilizer_reference_card_html("reference", reference_fertilizer, theme),
             self.fertilizer_reference_card_html("model", model_fertilizer, theme),
+            self.fertilizer_reference_card_html("test", reference_fertilizer, theme),
         ])
         self.fertilizer_reference_view.setHtml(
             f"""
