@@ -11,7 +11,9 @@ This project supports an EE209AS AgriGuide AI workflow for evaluating fertilizer
 - `scripts/`: Windows batch entry points for setup and runnable project tasks.
 - `project-docs/`: grading rubrics, model output instructions, dataset notes, and proposal material.
 - `plotting/`: generated charts for dataset distribution and split coverage.
-- `grading-results/`: intended output location for grader result CSVs.
+- `results-model/`: model output CSVs for each evaluated split.
+- `results-grading/`: intended output location for grader result CSVs.
+- `results-final/`: merged model, reference-answer, grader, and kappa report outputs.
 - `deps/requirements.txt`: pinned Python dependencies.
 
 ## Setup
@@ -59,6 +61,18 @@ scripts\generate_train_test_category_coverage_plot.bat 80-20
 scripts\generate_train_test_category_coverage_plot.bat split-70-30
 ```
 
+Merge model results, grader results, and reference answers into final CSVs:
+
+```bat
+scripts\merge_final_fertilizer_results.bat
+```
+
+Calculate Cohen's kappa for final CSVs:
+
+```bat
+scripts\calculate_final_cohen_kappa.bat
+```
+
 ## Dataset Splits
 
 The source dataset is `datasets/fertilizer-prediction-dataset.csv`.
@@ -82,6 +96,12 @@ Use `project-docs/cohen-kappa-grading.md` for the human grading rubric. The grad
 Recommended grading outputs belong in `results-grading/`.
 
 Recommended model outputs belong in `results-model/`.
+
+Use `scripts\merge_final_fertilizer_results.bat` after model outputs and human grading outputs exist for a split. The merge tool writes final wide-format CSVs to `results-final/` using the name pattern `fertilizer-result-final-graded-split-XX-XX.csv`.
+
+Use `scripts\calculate_final_cohen_kappa.bat` after final CSVs exist. The kappa tool prints grader-pair agreement results and saves matching text reports in `results-final/`.
+
+The final CSV format is documented in `project-docs/output-results-format.md`.
 
 ## Development Rules
 
