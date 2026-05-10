@@ -1,8 +1,8 @@
 # Fertilizer Model Output Instructions
 
-Use these instructions with one split's training file and matching model test file.
+Use these instructions with one split's model test file. Some splits also provide a training file; no-training splits such as `split-0-100` and `split-0-100-subset` do not.
 
-The training file contains correct fertilizer recommendations. The model test file omits the correct `Fertilizer Name`. Your task is to recommend a fertilizer for every row in the model test file and return one CSV file.
+The model test file omits the correct `Fertilizer Name`. Your task is to recommend a fertilizer for every row in the model test file and return one CSV file.
 
 ## Expected Decision-Support Fields
 
@@ -13,7 +13,7 @@ The training file contains correct fertilizer recommendations. The model test fi
 
 ## Required Output Filename
 
-Name the file using the model name and split like this: `fertilizer-result-modelname-split-XX-XX.csv` and use the actual model name and the `split-XX-XX` value from the input file.
+Name the file using the model name and split like this: `fertilizer-result-modelname-split-name.csv` and use the actual `split_name` value from the input file, such as `split-80-20` or `split-0-100-subset`.
 
 ## Required Output Format
 

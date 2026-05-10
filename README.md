@@ -5,7 +5,8 @@ This project supports an EE209AS AgriGuide AI workflow for evaluating fertilizer
 ## Project Layout
 
 - `datasets/`: source fertilizer dataset and generated split datasets.
-- `datasets/split-80-20/`, `datasets/split-70-30/`, `datasets/split-60-40/`: train, test, and model-facing test CSVs for each split.
+- `datasets/split-80-20/`, `datasets/split-70-30/`, `datasets/split-60-40/`: train, test, and model-facing test CSVs for each training split.
+- `datasets/split-0-100/`, `datasets/split-0-100-subset/`: no-training test and model-facing test CSVs.
 - `python/`: Python tools for dataset splitting, plotting, and the grader GUI.
 - `python/fertilizer_grader_gui/`: desktop GUI used for human grading.
 - `scripts/`: Windows batch entry points for setup and runnable project tasks.
@@ -59,6 +60,7 @@ Generate train/test category coverage for specific splits:
 ```bat
 scripts\generate_train_test_category_coverage_plot.bat 80-20
 scripts\generate_train_test_category_coverage_plot.bat split-70-30
+scripts\generate_train_test_category_coverage_plot.bat split-0-100-subset
 ```
 
 Merge model results, grader results, and reference answers into final CSVs:
@@ -77,17 +79,26 @@ scripts\calculate_final_cohen_kappa.bat
 
 The source dataset is `datasets/fertilizer-prediction-dataset.csv`.
 
-Each generated split directory contains:
+Training split directories contain:
 
 - `fertilizer-prediction-train.csv`: training data with reference `Fertilizer Name`.
 - `fertilizer-prediction-test.csv`: test data with reference `Fertilizer Name`.
 - `fertilizer-prediction-test-model.csv`: model-facing test data with `Fertilizer Name` removed.
 
+No-training split directories contain only:
+
+- `fertilizer-prediction-test.csv`: test data with reference `Fertilizer Name`.
+- `fertilizer-prediction-test-model.csv`: model-facing test data with `Fertilizer Name` removed.
+
+`split-0-100` uses all source rows as test rows. `split-0-100-subset` uses 15 deterministic rows selected to cover every crop type, soil type, and fertilizer label.
+
 The split script preserves category coverage for `Crop Type`, `Soil Type`, and `Fertilizer Name` when possible, adds `split_name`, and expects stable `item_id` values.
 
 ## Model Output and Grading Workflow
 
-Use `project-docs/model-input-instructions.md` to tell a model how to use the split training file and matching model-facing test file.
+Use `project-docs/model-input-instructions.md` to tell a model how to use a training split, or how to handle no-training splits that provide only the model-facing test file.
+
+Use `project-docs/model-instructions.md` for the short no-clue prompt context listing allowed fertilizers, crop scope, and required output columns.
 
 Use `project-docs/model-output-instructions.md` when asking a model to return fertilizer recommendations. The instructions define both the required CSV columns and the expected decision-support content for explanation, confidence, uncertainty/caution, and practical notes.
 
@@ -97,7 +108,7 @@ Recommended grading outputs belong in `results-grading/`.
 
 Recommended model outputs belong in `results-model/`.
 
-Use `scripts\merge_final_fertilizer_results.bat` after model outputs and human grading outputs exist for a split. The merge tool only lists splits that have model results, grader results, and reference test data available, shows the models and graders found for each split, requires every listed grader to grade every listed model response, then writes final wide-format CSVs to `results-final/` using the name pattern `fertilizer-result-final-graded-split-XX-XX.csv`.
+Use `scripts\merge_final_fertilizer_results.bat` after model outputs and human grading outputs exist for a split. The merge tool only lists splits that have model results, grader results, and reference test data available, shows the models and graders found for each split, requires every listed grader to grade every listed model response, then writes final wide-format CSVs to `results-final/` using the name pattern `fertilizer-result-final-graded-split-name.csv`.
 
 Use `scripts\calculate_final_cohen_kappa.bat` after final CSVs exist. The kappa tool prints grader-pair agreement results, includes separate agreement sections for each model in a combined final CSV, and saves matching text reports in `results-final/`.
 
@@ -108,3 +119,11 @@ The final CSV format is documented in `project-docs/output-results-format.md`.
 Project-specific agent rules live in `.agents/rules/`. Read those rules before changing the project.
 
 When project behavior, setup, scripts, dependencies, file layout, or user workflow changes, update this README in the same change so it remains accurate.
+
+# Grader Jump-Start
+
+Steps to do:
+1. Clone the project repository
+2. Run the install script to setup the virtual environment, `.\scripts\install-deps.bat`
+3. Run the grader-gui, `.\scripts\run_fertilizer_grader_gui.bat`
+4. Specify grader name in the GUI and the output directory must be set to `results-grading`

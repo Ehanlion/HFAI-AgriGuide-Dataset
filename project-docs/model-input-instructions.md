@@ -1,19 +1,23 @@
 # Fertilizer Model Input Instructions
 
-Use these instructions with one split's training file and matching model test file.
+Use these instructions with one split's files. Training splits provide a training file and matching model test file. No-training splits provide only the model test file.
 
-The training file contains examples with correct fertilizer recommendations. The model test file contains rows from the same split with the correct `Fertilizer Name` removed. Your job is to learn the pattern from the training file and apply it to each row in the model test file.
+For training splits, the training file contains examples with correct fertilizer recommendations. The model test file contains rows from the same split with the correct `Fertilizer Name` removed. Your job is to learn the pattern from the training file and apply it to each row in the model test file.
+
+For no-training splits such as `split-0-100` and `split-0-100-subset`, do not expect or request a training file. Use only the model test file, the short model instructions, and the output format instructions.
 
 ## Files to Use
 
-- Training file: `datasets/split-XX-XX/fertilizer-prediction-train.csv`
-- Model test file: `datasets/split-XX-XX/fertilizer-prediction-test-model.csv`
+- Training file, when present: `datasets/split-name/fertilizer-prediction-train.csv`
+- Model test file: `datasets/split-name/fertilizer-prediction-test-model.csv`
+- Short model instructions: `project-docs/model-instructions.md`
 - Output format instructions: `project-docs/model-output-instructions.md`
 
-Use files from the same split only. For example, if the test file is from `split-80-20`, use the `split-80-20` training file.
+Use files from the same split only. For example, if the test file is from `split-80-20`, use the `split-80-20` training file. If the test file is from `split-0-100`, use no training file.
 
 ## How to Use the Training Dataset
 
+- Skip this section for no-training splits.
 - Treat the training CSV as labeled examples of fertilizer recommendations for different crop, soil, environmental, and nutrient conditions.
 - Use `Fertilizer Name` in the training file as the reference label to learn from.
 - Pay attention to the relationship between `Crop Type`, `Soil Type`, `Moisture`, `Temparature`, `Humidity `, `Nitrogen`, `Potassium`, `Phosphorous`, and `Fertilizer Name`.

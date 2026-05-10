@@ -12,11 +12,13 @@ The script lists only complete dataset splits that can be generated from the ava
 
 Final CSV files are written to `results-final/` with this name pattern:
 
-`fertilizer-result-final-graded-split-XX-XX.csv`
+`fertilizer-result-final-graded-split-name.csv`
 
 Example:
 
 `results-final/fertilizer-result-final-graded-split-80-20.csv`
+
+`results-final/fertilizer-result-final-graded-split-0-100-subset.csv`
 
 ## Row Shape
 
@@ -105,7 +107,7 @@ For a selected split, the merge tool requires:
 
 - At least one model result CSV in `results-model/`.
 - At least one grader result CSV in `results-grading/`.
-- A matching reference test CSV at `datasets/split-XX-XX/fertilizer-prediction-test.csv`.
+- A matching reference test CSV at `datasets/split-name/fertilizer-prediction-test.csv`.
 
 The tool prints a clear error if any required input is missing, if a file contains rows from the wrong split, if rows cannot be matched, or if any grader is missing grades for a model response in the selected split.
 
@@ -124,6 +126,8 @@ The script lists available final CSV files and can calculate one file or all fil
 Reports are printed to the console and saved to `results-final/` as text files named like:
 
 `cohen-kappa-fertilizer-result-final-graded-split-80-20.txt`
+
+`cohen-kappa-fertilizer-result-final-graded-split-0-100-subset.txt`
 
 The report calculates unweighted kappa for `recommendation_correctness` and linear weighted kappa for the 1-to-5 rubric columns.
 

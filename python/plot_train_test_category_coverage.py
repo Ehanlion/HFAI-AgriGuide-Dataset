@@ -10,7 +10,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DATASET_DIR = PROJECT_ROOT / "datasets"
 OUTPUT_DIR = PROJECT_ROOT / "plotting"
 
-SPLITS = ["80-20", "70-30", "60-40"]
+SPLITS = ["80-20", "70-30", "60-40", "0-100", "0-100-subset"]
 
 CATEGORIES = [
     ("Crop Type", "Crop Type"),
@@ -76,24 +76,28 @@ def requested_splits() -> list[str]:
 
 
 def plot_split(split_name: str) -> None:
-    train_rows = read_rows(train_dataset_path(split_name))
     test_rows = read_rows(test_dataset_path(split_name))
+    train_path = train_dataset_path(split_name)
+    train_rows = read_rows(train_path) if train_path.exists() else []
+    has_train = bool(train_rows)
 
-    fig, axes = plt.subplots(3, 2, figsize=(15, 13), constrained_layout=True)
+    column_count = 2 if has_train else 1
+    fig, axes = plt.subplots(3, column_count, figsize=(15 if has_train else 9, 13), constrained_layout=True)
 
     for row_index, (column_name, label) in enumerate(CATEGORIES):
-        plot_counts(
-            axes[row_index][0],
-            count_values(train_rows, column_name),
-            f"Train {label}",
-        )
-        plot_counts(
-            axes[row_index][1],
-            count_values(test_rows, column_name),
-            f"Test {label}",
-        )
+        if has_train:
+            plot_counts(
+                axes[row_index][0],
+                count_values(train_rows, column_name),
+                f"Train {label}",
+            )
+            test_axis = axes[row_index][1]
+        else:
+            test_axis = axes[row_index]
+        plot_counts(test_axis, count_values(test_rows, column_name), f"Test {label}")
 
-    fig.suptitle(f"Train/Test Category Coverage ({split_name})", fontsize=18)
+    title_prefix = "Train/Test" if has_train else "Test"
+    fig.suptitle(f"{title_prefix} Category Coverage ({split_name})", fontsize=18)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     path = output_path(split_name)
     fig.savefig(path, dpi=200)

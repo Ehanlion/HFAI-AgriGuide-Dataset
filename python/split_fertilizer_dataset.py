@@ -2,6 +2,7 @@ import csv
 import random
 import sys
 from collections import Counter
+from dataclasses import dataclass
 from pathlib import Path
 
 
@@ -13,10 +14,22 @@ ITEM_ID_COLUMN = "item_id"
 SPLIT_NAME_COLUMN = "split_name"
 FERTILIZER_COLUMN = "Fertilizer Name"
 CATEGORY_COLUMNS = ["Crop Type", "Soil Type", "Fertilizer Name"]
+
+
+@dataclass(frozen=True)
+class SplitSpec:
+    name: str
+    test_ratio: float | None
+    subset_size: int | None = None
+    write_train: bool = True
+
+
 SPLITS = {
-    "80-20": 0.20,
-    "70-30": 0.30,
-    "60-40": 0.40,
+    "80-20": SplitSpec("80-20", 0.20),
+    "70-30": SplitSpec("70-30", 0.30),
+    "60-40": SplitSpec("60-40", 0.40),
+    "0-100": SplitSpec("0-100", None, write_train=False),
+    "0-100-subset": SplitSpec("0-100-subset", None, subset_size=15, write_train=False),
 }
 RANDOM_SEED = 209
 
@@ -210,22 +223,92 @@ def validate_split(
             )
 
 
-def requested_splits() -> list[tuple[str, float]]:
-    if len(sys.argv) == 1:
-        return list(SPLITS.items())
+def select_coverage_subset(
+    rows: list[dict[str, str]],
+    subset_size: int,
+) -> list[dict[str, str]]:
+    all_categories = set().union(*(category_values(row) for row in rows))
+    covered_categories: set[tuple[str, str]] = set()
+    selected_rows: list[dict[str, str]] = []
 
-    split_names = []
+    if subset_size < len(all_categories):
+        # Each row can cover at most one value per category column, so this is a
+        # quick impossible-case check before the greedy selector runs.
+        minimum_possible = max(
+            len({(row.get(column) or "").strip() for row in rows})
+            for column in CATEGORY_COLUMNS
+        )
+        if subset_size < minimum_possible:
+            raise ValueError(
+                f"Subset size {subset_size} is too small to cover all category values."
+            )
+
+    def current_count_sum(row: dict[str, str]) -> int:
+        return sum(
+            sum(
+                1
+                for selected_row in selected_rows
+                if selected_row.get(column) == row.get(column)
+            )
+            for column in CATEGORY_COLUMNS
+        )
+
+    while covered_categories != all_categories:
+        candidates = [row for row in rows if row not in selected_rows]
+        if not candidates:
+            missing = ", ".join(
+                f"{column}={value}"
+                for column, value in sorted(all_categories - covered_categories)
+            )
+            raise ValueError(f"Could not cover these categories in subset: {missing}")
+
+        candidates.sort(
+            key=lambda row: (
+                -len(category_values(row) - covered_categories),
+                current_count_sum(row),
+                row.get(ITEM_ID_COLUMN, ""),
+            )
+        )
+        selected_rows.append(candidates[0])
+        covered_categories.update(category_values(candidates[0]))
+
+    while len(selected_rows) < subset_size:
+        candidates = [row for row in rows if row not in selected_rows]
+        if not candidates:
+            break
+        candidates.sort(
+            key=lambda row: (
+                current_count_sum(row),
+                row.get(ITEM_ID_COLUMN, ""),
+            )
+        )
+        selected_rows.append(candidates[0])
+
+    if len(selected_rows) > subset_size:
+        raise ValueError(
+            f"Needed {len(selected_rows)} rows to cover all category values; "
+            f"subset limit is {subset_size}."
+        )
+
+    return selected_rows
+
+
+def requested_splits() -> list[SplitSpec]:
+    if len(sys.argv) == 1:
+        return list(SPLITS.values())
+
+    split_specs = []
     for argument in sys.argv[1:]:
         split_name = argument.removeprefix("split-")
         if split_name not in SPLITS:
             valid = ", ".join(SPLITS)
             raise ValueError(f"Unknown split '{argument}'. Valid splits: {valid}")
-        split_names.append(split_name)
+        split_specs.append(SPLITS[split_name])
 
-    return [(split_name, SPLITS[split_name]) for split_name in split_names]
+    return split_specs
 
 
-def write_split(
+def write_ratio_split(
     split_name: str,
     test_ratio: float,
     fieldnames: list[str],
@@ -257,13 +340,56 @@ def write_split(
     )
 
 
+def write_test_only_split(
+    split_name: str,
+    fieldnames: list[str],
+    rows: list[dict[str, str]],
+    subset_size: int | None = None,
+) -> None:
+    test_rows = select_coverage_subset(rows, subset_size) if subset_size else rows
+
+    output_dir = split_dir(split_name)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    train_path = train_dataset_path(split_name)
+    if train_path.exists():
+        train_path.unlink()
+
+    output_fieldnames = split_fieldnames(fieldnames)
+    test_rows_with_split = add_split_name(test_rows, split_name)
+    write_dataset(test_dataset_path(split_name), output_fieldnames, test_rows_with_split)
+    write_dataset(
+        model_test_dataset_path(split_name),
+        model_test_fieldnames(fieldnames),
+        remove_fertilizer_name(test_rows_with_split),
+    )
+
+    print(
+        f"Wrote split-{split_name}: no train rows, {len(test_rows)} test rows, "
+        f"{len(test_rows)} model test rows"
+    )
+
+
+def write_split(
+    spec: SplitSpec,
+    fieldnames: list[str],
+    rows: list[dict[str, str]],
+) -> None:
+    if spec.write_train:
+        if spec.test_ratio is None:
+            raise ValueError(f"Split {spec.name} is missing a test ratio.")
+        write_ratio_split(spec.name, spec.test_ratio, fieldnames, rows)
+        return
+
+    write_test_only_split(spec.name, fieldnames, rows, spec.subset_size)
+
+
 def main() -> None:
     fieldnames, rows = read_dataset()
     validate_item_ids(rows)
     validate_all_categories_can_be_split(rows)
 
-    for split_name, test_ratio in requested_splits():
-        write_split(split_name, test_ratio, fieldnames, rows)
+    for spec in requested_splits():
+        write_split(spec, fieldnames, rows)
 
 
 if __name__ == "__main__":

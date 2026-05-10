@@ -81,7 +81,7 @@ def write_csv_rows(path: Path, fieldnames: list[str], rows: list[dict[str, str]]
 
 
 def split_token(value: str) -> str | None:
-    match = re.search(r"split-(\d+-\d+)", value)
+    match = re.search(r"split-([a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*)(?=\.csv|/|\\|$)", value)
     return match.group(1) if match else None
 
 
