@@ -6,7 +6,7 @@ The final combined result files are created by:
 scripts\merge_final_fertilizer_results.bat
 ```
 
-The script lists available dataset splits and can create one split file or all split files.
+The script lists only complete dataset splits that can be generated from the available files. A split is complete when it has at least one model result CSV, at least one grader result CSV, and the matching reference test CSV. The menu also shows the models and graders found for each split. The script can create one split file or all complete split files.
 
 ## Output Location
 
@@ -97,6 +97,8 @@ A typical final CSV header for two graders would contain columns like:
 
 For each `item_id`, there would usually be two rows: one for Model A and one for Model B. Ethan and Rachel's grades for Model A are stored on the Model A row, and their grades for Model B are stored on the Model B row.
 
+The merge tool requires complete grader coverage. If Ethan and Rachel are both present for a split, then both graders must have graded every model response included in that split. For example, if Rachel graded Model A but did not grade Model B, the merge fails instead of creating a final CSV with blank Rachel columns for Model B.
+
 ## Required Inputs
 
 For a selected split, the merge tool requires:
@@ -105,7 +107,9 @@ For a selected split, the merge tool requires:
 - At least one grader result CSV in `results-grading/`.
 - A matching reference test CSV at `datasets/split-XX-XX/fertilizer-prediction-test.csv`.
 
-The tool prints a clear error if any required input is missing, if a file contains rows from the wrong split, or if rows cannot be matched.
+The tool prints a clear error if any required input is missing, if a file contains rows from the wrong split, if rows cannot be matched, or if any grader is missing grades for a model response in the selected split.
+
+Splits that do not have all required input categories are not shown in the selection menu.
 
 ## Cohen's Kappa Reports
 

@@ -57,6 +57,13 @@ class MergeError(Exception):
     pass
 
 
+class SplitSummary:
+    def __init__(self, token: str, models: list[str], graders: list[str]) -> None:
+        self.token = token
+        self.models = models
+        self.graders = graders
+
+
 def read_csv_rows(path: Path) -> tuple[list[str], list[dict[str, str]]]:
     with path.open(newline="", encoding="utf-8-sig") as csv_file:
         reader = csv.DictReader(csv_file)
@@ -128,20 +135,25 @@ def validate_single_split(path: Path, rows: list[dict[str, str]], expected_split
 
 
 def discover_split_tokens() -> list[str]:
-    tokens: set[str] = set()
+    model_tokens: set[str] = set()
     for path in MODEL_RESULTS_DIR.glob("*.csv"):
         token = split_token(path.name)
         if token:
-            tokens.add(token)
+            model_tokens.add(token)
+
+    grading_tokens: set[str] = set()
     for path in GRADING_RESULTS_DIR.glob("*.csv"):
         token = split_token(path.name)
         if token:
-            tokens.add(token)
+            grading_tokens.add(token)
+
+    reference_tokens: set[str] = set()
     for path in DATASETS_DIR.glob("split-*/fertilizer-prediction-test.csv"):
         token = split_token(str(path))
         if token:
-            tokens.add(token)
-    return sorted(tokens)
+            reference_tokens.add(token)
+
+    return sorted(model_tokens & grading_tokens & reference_tokens)
 
 
 def files_for_split(directory: Path, token: str) -> list[Path]:
@@ -152,14 +164,54 @@ def reference_path_for_split(token: str) -> Path:
     return DATASETS_DIR / split_name(token) / "fertilizer-prediction-test.csv"
 
 
-def select_splits(tokens: list[str]) -> list[str]:
-    if not tokens:
-        raise MergeError("No split files were found in results-model, results-grading, or datasets.")
+def model_label(row: dict[str, str]) -> str:
+    model_name = row.get(MODEL_NAME_COLUMN, "").strip() or "unknown_model"
+    prompt_version = row.get(PROMPT_VERSION_COLUMN, "").strip()
+    if prompt_version:
+        return f"{model_name} / {prompt_version}"
+    return model_name
+
+
+def summarize_split(token: str) -> SplitSummary:
+    models: set[str] = set()
+    for path in files_for_split(MODEL_RESULTS_DIR, token):
+        fieldnames, rows = read_csv_rows(path)
+        require_columns(path, fieldnames, MODEL_REQUIRED_COLUMNS)
+        validate_single_split(path, rows, split_name(token))
+        models.update(model_label(row) for row in rows)
+
+    graders: set[str] = set()
+    for path in files_for_split(GRADING_RESULTS_DIR, token):
+        fieldnames, rows = read_csv_rows(path)
+        require_columns(path, fieldnames, GRADER_REQUIRED_COLUMNS)
+        validate_single_split(path, rows, split_name(token))
+        graders.update(row.get(GRADER_ID_COLUMN, "").strip() for row in rows)
+
+    return SplitSummary(
+        token=token,
+        models=sorted(model for model in models if model),
+        graders=sorted(grader for grader in graders if grader),
+    )
+
+
+def discover_split_summaries() -> list[SplitSummary]:
+    return [summarize_split(token) for token in discover_split_tokens()]
+
+
+def select_splits(summaries: list[SplitSummary]) -> list[str]:
+    if not summaries:
+        raise MergeError(
+            "No complete splits are available. A split needs at least one model result CSV "
+            "in results-model, at least one grader result CSV in results-grading, and a "
+            "matching fertilizer-prediction-test.csv in datasets."
+        )
 
     print("Select split to create final results for:")
-    for index, token in enumerate(tokens, start=1):
-        print(f"{index}. {split_name(token)}")
-    all_option = len(tokens) + 1
+    for index, summary in enumerate(summaries, start=1):
+        print(f"{index}. {split_name(summary.token)}")
+        print(f"   Models: {', '.join(summary.models) if summary.models else 'none'}")
+        print(f"   Graders: {', '.join(summary.graders) if summary.graders else 'none'}")
+    all_option = len(summaries) + 1
     print(f"{all_option}. All splits")
 
     choice = input("Enter number: ").strip()
@@ -167,9 +219,9 @@ def select_splits(tokens: list[str]) -> list[str]:
         raise MergeError("Selection must be a number.")
     choice_index = int(choice)
     if choice_index == all_option:
-        return tokens
-    if 1 <= choice_index <= len(tokens):
-        return [tokens[choice_index - 1]]
+        return [summary.token for summary in summaries]
+    if 1 <= choice_index <= len(summaries):
+        return [summaries[choice_index - 1].token]
     raise MergeError(f"Selection must be between 1 and {all_option}.")
 
 
@@ -250,6 +302,19 @@ def merge_split(token: str) -> Path:
         raise MergeError(f"Grader rows do not match model results, including {unmatched_grade_keys[0]}.")
 
     grader_ids = sorted({grader_id for grades in grades_by_key.values() for grader_id in grades})
+    missing_grade_sets = [
+        (key, grader_id)
+        for key in sorted(model_keys)
+        for grader_id in grader_ids
+        if grader_id not in grades_by_key.get(key, {})
+    ]
+    if missing_grade_sets:
+        missing_key, missing_grader = missing_grade_sets[0]
+        raise MergeError(
+            f"Cannot merge incomplete grading results. Grader {missing_grader} is missing "
+            f"a grade for row key {missing_key}."
+        )
+
     grader_fields = [
         f"grader_{safe_column_token(grader_id)}_{rubric}"
         for grader_id in grader_ids
@@ -288,8 +353,8 @@ def merge_split(token: str) -> Path:
 
 def main() -> int:
     try:
-        tokens = discover_split_tokens()
-        selected_tokens = select_splits(tokens)
+        summaries = discover_split_summaries()
+        selected_tokens = select_splits(summaries)
         failures: list[str] = []
         for token in selected_tokens:
             try:

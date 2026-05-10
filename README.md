@@ -97,7 +97,7 @@ Recommended grading outputs belong in `results-grading/`.
 
 Recommended model outputs belong in `results-model/`.
 
-Use `scripts\merge_final_fertilizer_results.bat` after model outputs and human grading outputs exist for a split. The merge tool writes final wide-format CSVs to `results-final/` using the name pattern `fertilizer-result-final-graded-split-XX-XX.csv`.
+Use `scripts\merge_final_fertilizer_results.bat` after model outputs and human grading outputs exist for a split. The merge tool only lists splits that have model results, grader results, and reference test data available, shows the models and graders found for each split, requires every listed grader to grade every listed model response, then writes final wide-format CSVs to `results-final/` using the name pattern `fertilizer-result-final-graded-split-XX-XX.csv`.
 
 Use `scripts\calculate_final_cohen_kappa.bat` after final CSVs exist. The kappa tool prints grader-pair agreement results, includes separate agreement sections for each model in a combined final CSV, and saves matching text reports in `results-final/`.
 
