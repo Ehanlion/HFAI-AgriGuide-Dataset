@@ -18,6 +18,13 @@ DEFAULT_OUTPUT = (
 )
 ITEM_ID_COLUMN = "item_id"
 GRADER_COLUMN_PREFIX = "grader_"
+RUBRIC_COLUMN_SHORT_NAMES = {
+    "recommendation_correctness": "correctness",
+    "explanation_relevance": "explanation",
+    "clarity": "clarity",
+    "uncertainty_calibration": "uncertainty",
+    "decision_support_usefulness": "support",
+}
 
 
 class ExtractError(Exception):
@@ -34,19 +41,42 @@ def extract_fields(input_path: Path, output_path: Path) -> None:
         if ITEM_ID_COLUMN not in fieldnames:
             raise ExtractError(f"{input_path} is missing required column: {ITEM_ID_COLUMN}")
 
-        output_columns = [
+        source_columns = [
             ITEM_ID_COLUMN,
             *[field for field in fieldnames if field.startswith(GRADER_COLUMN_PREFIX)],
         ]
-        if len(output_columns) == 1:
+        if len(source_columns) == 1:
             raise ExtractError(f"{input_path} does not contain any grader columns.")
 
+        output_columns = [short_column_name(column) for column in source_columns]
         output_path.parent.mkdir(parents=True, exist_ok=True)
         with output_path.open("w", newline="", encoding="utf-8") as output_file:
             writer = csv.DictWriter(output_file, fieldnames=output_columns)
             writer.writeheader()
             for row in reader:
-                writer.writerow({column: row.get(column, "") for column in output_columns})
+                writer.writerow(
+                    {
+                        short_column_name(column): row.get(column, "")
+                        for column in source_columns
+                    }
+                )
+
+
+def short_column_name(column: str) -> str:
+    if column == ITEM_ID_COLUMN:
+        return column
+
+    if not column.startswith(GRADER_COLUMN_PREFIX):
+        return column
+
+    grader_and_rubric = column[len(GRADER_COLUMN_PREFIX) :]
+    for rubric, short_name in RUBRIC_COLUMN_SHORT_NAMES.items():
+        suffix = f"_{rubric}"
+        if grader_and_rubric.endswith(suffix):
+            grader_id = grader_and_rubric[: -len(suffix)]
+            return f"{grader_id}_{short_name}"
+
+    return grader_and_rubric
 
 
 def parse_args() -> argparse.Namespace:

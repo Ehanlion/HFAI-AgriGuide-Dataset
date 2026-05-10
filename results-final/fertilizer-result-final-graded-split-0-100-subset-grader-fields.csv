@@ -1,4 +1,4 @@
-item_id,grader_ethan_recommendation_correctness,grader_ethan_explanation_relevance,grader_ethan_clarity,grader_ethan_uncertainty_calibration,grader_ethan_decision_support_usefulness,grader_rachel_recommendation_correctness,grader_rachel_explanation_relevance,grader_rachel_clarity,grader_rachel_uncertainty_calibration,grader_rachel_decision_support_usefulness
+item_id,ethan_correctness,ethan_explanation,ethan_clarity,ethan_uncertainty,ethan_support,rachel_correctness,rachel_explanation,rachel_clarity,rachel_uncertainty,rachel_support
 FERT-001,correct,5,4,4,5,correct,4,5,3,5
 FERT-002,correct,4,4,4,3,correct,4,4,4,4
 FERT-003,correct,4,4,5,4,correct,5,5,5,5
