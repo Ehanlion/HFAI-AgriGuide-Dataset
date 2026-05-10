@@ -19,6 +19,8 @@ RUBRIC_COLUMNS = [
     "uncertainty_calibration",
     "decision_support_usefulness",
 ]
+MODEL_NAME_COLUMN = "model_name"
+PROMPT_VERSION_COLUMN = "prompt_version"
 WEIGHTED_RUBRICS = {
     "explanation_relevance",
     "clarity",
@@ -125,23 +127,23 @@ def format_kappa(value: float | None) -> str:
     return "undefined" if value is None else f"{value:.4f}"
 
 
-def report_path_for(path: Path) -> Path:
-    cleaned = re.sub(r"[^a-zA-Z0-9_-]+", "-", path.stem).strip("-") or path.stem
-    return FINAL_RESULTS_DIR / f"cohen-kappa-{cleaned}.txt"
+def model_group_label(row: dict[str, str]) -> str:
+    model_name = row.get(MODEL_NAME_COLUMN, "").strip() or "unknown_model"
+    prompt_version = row.get(PROMPT_VERSION_COLUMN, "").strip()
+    if prompt_version:
+        return f"{model_name} / {prompt_version}"
+    return model_name
 
 
-def calculate_for_file(path: Path) -> str:
-    fieldnames, rows = read_csv_rows(path)
-    grader_ids = grader_ids_from_fields(fieldnames)
-    if len(grader_ids) < 2:
-        raise KappaError(f"{path.name} has fewer than two graders.")
-
-    lines = [
-        f"Cohen's kappa report for {path.name}",
-        f"Rows: {len(rows)}",
-        f"Graders: {', '.join(grader_ids)}",
-        "",
-    ]
+def append_kappa_section(
+    lines: list[str],
+    section_title: str,
+    rows: list[dict[str, str]],
+    fieldnames: list[str],
+    grader_ids: list[str],
+) -> None:
+    lines.append(section_title)
+    lines.append(f"Rows: {len(rows)}")
     for left_grader, right_grader in itertools.combinations(grader_ids, 2):
         lines.append(f"{left_grader} vs {right_grader}")
         for rubric in RUBRIC_COLUMNS:
@@ -149,7 +151,7 @@ def calculate_for_file(path: Path) -> str:
             right_column = column_for(right_grader, rubric)
             if left_column not in fieldnames or right_column not in fieldnames:
                 raise KappaError(
-                    f"{path.name} is missing columns for {left_grader}/{right_grader} {rubric}."
+                    f"Missing columns for {left_grader}/{right_grader} {rubric}."
                 )
             pairs = [
                 (row.get(left_column, "").strip(), row.get(right_column, "").strip())
@@ -160,6 +162,40 @@ def calculate_for_file(path: Path) -> str:
             weighting = "linear weighted" if rubric in WEIGHTED_RUBRICS else "unweighted"
             lines.append(f"  {rubric}: {format_kappa(kappa)} ({weighting}, n={len(pairs)})")
         lines.append("")
+
+
+def report_path_for(path: Path) -> Path:
+    cleaned = re.sub(r"[^a-zA-Z0-9_-]+", "-", path.stem).strip("-") or path.stem
+    return FINAL_RESULTS_DIR / f"cohen-kappa-{cleaned}.txt"
+
+
+def calculate_for_file(path: Path) -> str:
+    fieldnames, rows = read_csv_rows(path)
+    grader_ids = grader_ids_from_fields(fieldnames)
+    if len(grader_ids) < 2:
+        raise KappaError(f"{path.name} has fewer than two graders.")
+    if MODEL_NAME_COLUMN not in fieldnames:
+        raise KappaError(f"{path.name} is missing required column: {MODEL_NAME_COLUMN}")
+
+    lines = [
+        f"Cohen's kappa report for {path.name}",
+        f"Graders: {', '.join(grader_ids)}",
+        "",
+    ]
+    append_kappa_section(lines, "Overall agreement across all models", rows, fieldnames, grader_ids)
+
+    rows_by_model: dict[str, list[dict[str, str]]] = {}
+    for row in rows:
+        rows_by_model.setdefault(model_group_label(row), []).append(row)
+
+    for label in sorted(rows_by_model):
+        append_kappa_section(
+            lines,
+            f"Agreement for model: {label}",
+            rows_by_model[label],
+            fieldnames,
+            grader_ids,
+        )
 
     report = "\n".join(lines).rstrip() + "\n"
     report_path = report_path_for(path)

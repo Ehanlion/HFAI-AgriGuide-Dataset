@@ -1,0 +1,21 @@
+item_id,split_name,model_name,prompt_version,grader_id,reference_fertilizer,model_fertilizer,recommendation_correctness,explanation_relevance,clarity,uncertainty_calibration,decision_support_usefulness
+FERT-007,split-80-20,GPT-5.5 Thinking,model-input-output-instructions-v1,ethan,20-20,20-20,correct,5,5,4,5
+FERT-009,split-80-20,GPT-5.5 Thinking,model-input-output-instructions-v1,ethan,28-28,28-28,correct,3,5,5,5
+FERT-012,split-80-20,GPT-5.5 Thinking,model-input-output-instructions-v1,ethan,17-17-17,17-17-17,correct,3,4,4,5
+FERT-018,split-80-20,GPT-5.5 Thinking,model-input-output-instructions-v1,ethan,28-28,28-28,correct,5,5,4,5
+FERT-024,split-80-20,GPT-5.5 Thinking,model-input-output-instructions-v1,ethan,Urea,Urea,correct,5,3,3,5
+FERT-031,split-80-20,GPT-5.5 Thinking,model-input-output-instructions-v1,ethan,28-28,28-28,correct,5,5,5,5
+FERT-035,split-80-20,GPT-5.5 Thinking,model-input-output-instructions-v1,ethan,28-28,28-28,correct,4,5,5,4
+FERT-038,split-80-20,GPT-5.5 Thinking,model-input-output-instructions-v1,ethan,DAP,DAP,correct,4,5,5,4
+FERT-043,split-80-20,GPT-5.5 Thinking,model-input-output-instructions-v1,ethan,28-28,28-28,correct,3,4,5,5
+FERT-051,split-80-20,GPT-5.5 Thinking,model-input-output-instructions-v1,ethan,28-28,28-28,correct,4,5,5,4
+FERT-054,split-80-20,GPT-5.5 Thinking,model-input-output-instructions-v1,ethan,DAP,DAP,correct,3,3,4,5
+FERT-057,split-80-20,GPT-5.5 Thinking,model-input-output-instructions-v1,ethan,Urea,Urea,correct,4,5,5,4
+FERT-059,split-80-20,GPT-5.5 Thinking,model-input-output-instructions-v1,ethan,17-17-17,17-17-17,correct,5,4,4,5
+FERT-066,split-80-20,GPT-5.5 Thinking,model-input-output-instructions-v1,ethan,DAP,DAP,correct,4,5,5,5
+FERT-068,split-80-20,GPT-5.5 Thinking,model-input-output-instructions-v1,ethan,14-35-14,14-35-14,correct,5,5,5,5
+FERT-073,split-80-20,GPT-5.5 Thinking,model-input-output-instructions-v1,ethan,28-28,28-28,correct,4,4,3,3
+FERT-074,split-80-20,GPT-5.5 Thinking,model-input-output-instructions-v1,ethan,Urea,Urea,correct,5,5,4,3
+FERT-079,split-80-20,GPT-5.5 Thinking,model-input-output-instructions-v1,ethan,10-26-26,10-26-26,correct,5,4,2,2
+FERT-083,split-80-20,GPT-5.5 Thinking,model-input-output-instructions-v1,ethan,DAP,DAP,correct,4,5,4,5
+FERT-099,split-80-20,GPT-5.5 Thinking,model-input-output-instructions-v1,ethan,20-20,20-20,partially_correct,4,5,5,5

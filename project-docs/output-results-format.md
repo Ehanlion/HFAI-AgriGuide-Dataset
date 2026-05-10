@@ -52,6 +52,51 @@ Example columns for grader `ethan`:
 - `grader_ethan_uncertainty_calibration`
 - `grader_ethan_decision_support_usefulness`
 
+## Example Columns for Two Models and Two Graders
+
+If two model result files exist for the same split, and two graders each grade both models, the grader folder can contain four grader CSV files:
+
+- `fertilizer-result-model-a-split-80-20-ethan.csv`
+- `fertilizer-result-model-a-split-80-20-rachel.csv`
+- `fertilizer-result-model-b-split-80-20-ethan.csv`
+- `fertilizer-result-model-b-split-80-20-rachel.csv`
+
+The final CSV still has one row per model response. It does not create separate grader columns for each model, because the model identity is already stored on each row in `model_name` and `prompt_version`.
+
+A typical final CSV header for two graders would contain columns like:
+
+- `item_id`
+- `split_name`
+- `Temparature`
+- `Humidity `
+- `Moisture`
+- `Soil Type`
+- `Crop Type`
+- `Nitrogen`
+- `Potassium`
+- `Phosphorous`
+- `model_name`
+- `prompt_version`
+- `model_fertilizer`
+- `explanation`
+- `confidence_statement`
+- `uncertainty_or_caution`
+- `decision_support_notes`
+- `actual_fertilizer`
+- `is_model_fertilizer_exact_match`
+- `grader_ethan_recommendation_correctness`
+- `grader_ethan_explanation_relevance`
+- `grader_ethan_clarity`
+- `grader_ethan_uncertainty_calibration`
+- `grader_ethan_decision_support_usefulness`
+- `grader_rachel_recommendation_correctness`
+- `grader_rachel_explanation_relevance`
+- `grader_rachel_clarity`
+- `grader_rachel_uncertainty_calibration`
+- `grader_rachel_decision_support_usefulness`
+
+For each `item_id`, there would usually be two rows: one for Model A and one for Model B. Ethan and Rachel's grades for Model A are stored on the Model A row, and their grades for Model B are stored on the Model B row.
+
 ## Required Inputs
 
 For a selected split, the merge tool requires:
@@ -77,3 +122,10 @@ Reports are printed to the console and saved to `results-final/` as text files n
 `cohen-kappa-fertilizer-result-final-graded-split-80-20.txt`
 
 The report calculates unweighted kappa for `recommendation_correctness` and linear weighted kappa for the 1-to-5 rubric columns.
+
+When a final CSV contains multiple models, the kappa report includes:
+
+- Overall agreement across all model rows.
+- Separate agreement sections for each `model_name` and `prompt_version`.
+
+This means a final CSV containing two models and two graders will produce distinct Cohen's kappa scores for each model's graded responses, plus an overall score across both models.

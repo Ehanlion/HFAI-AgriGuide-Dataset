@@ -36,6 +36,7 @@ GUI_DIR = Path(__file__).resolve().parent
 STATE_DIR = GUI_DIR / ".gui-state"
 STATE_PATH = STATE_DIR / "state.json"
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "results-grading"
+LEGACY_OUTPUT_DIR = PROJECT_ROOT / "grading-results"
 REFERENCE_FERTILIZER_COLUMN = "Fertilizer Name"
 MODEL_FERTILIZER_COLUMN = "model_fertilizer"
 ITEM_ID_COLUMN = "item_id"
@@ -373,6 +374,14 @@ def write_gui_state(state: dict[str, str]) -> None:
         json.dump(state, state_file, indent=2)
 
 
+def defaulted_output_dir(value: str) -> str:
+    if not value:
+        return str(DEFAULT_OUTPUT_DIR)
+    if Path(value) == LEGACY_OUTPUT_DIR:
+        return str(DEFAULT_OUTPUT_DIR)
+    return value
+
+
 class KeyValueTable(QTableWidget):
     def __init__(self) -> None:
         super().__init__(0, 2)
@@ -537,7 +546,7 @@ class GraderWindow(QMainWindow):
     def load_gui_state(self) -> None:
         state = read_gui_state()
         self.grader_input.setText(safe_name(state.get("grader", "")) if state.get("grader") else "")
-        self.output_input.setText(state.get("output_dir", str(DEFAULT_OUTPUT_DIR)))
+        self.output_input.setText(defaulted_output_dir(state.get("output_dir", "")))
         self.model_input.setText(state.get("model_csv", ""))
         self.reference_input.setText(state.get("reference_csv", ""))
         stored_theme = state.get("theme", "light")

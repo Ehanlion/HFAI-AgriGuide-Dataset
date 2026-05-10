@@ -99,7 +99,7 @@ Recommended model outputs belong in `results-model/`.
 
 Use `scripts\merge_final_fertilizer_results.bat` after model outputs and human grading outputs exist for a split. The merge tool writes final wide-format CSVs to `results-final/` using the name pattern `fertilizer-result-final-graded-split-XX-XX.csv`.
 
-Use `scripts\calculate_final_cohen_kappa.bat` after final CSVs exist. The kappa tool prints grader-pair agreement results and saves matching text reports in `results-final/`.
+Use `scripts\calculate_final_cohen_kappa.bat` after final CSVs exist. The kappa tool prints grader-pair agreement results, includes separate agreement sections for each model in a combined final CSV, and saves matching text reports in `results-final/`.
 
 The final CSV format is documented in `project-docs/output-results-format.md`.
 
