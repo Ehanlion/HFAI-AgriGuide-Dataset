@@ -1,0 +1,20 @@
+Cohen's kappa report for fertilizer-result-final-graded-split-0-100-subset.csv
+Graders: ethan, rachel
+
+Overall agreement across all models
+Rows: 15
+ethan vs rachel
+  recommendation_correctness: 0.6429 (unweighted, n=15)
+  explanation_relevance: 0.0000 (linear weighted, n=15)
+  clarity: -0.0000 (linear weighted, n=15)
+  uncertainty_calibration: 0.0000 (linear weighted, n=15)
+  decision_support_usefulness: 0.0000 (linear weighted, n=15)
+
+Agreement for model: gpt-5.5-thinking / v1
+Rows: 15
+ethan vs rachel
+  recommendation_correctness: 0.6429 (unweighted, n=15)
+  explanation_relevance: 0.0000 (linear weighted, n=15)
+  clarity: -0.0000 (linear weighted, n=15)
+  uncertainty_calibration: 0.0000 (linear weighted, n=15)
+  decision_support_usefulness: 0.0000 (linear weighted, n=15)
