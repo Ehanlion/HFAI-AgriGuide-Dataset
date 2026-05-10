@@ -32,7 +32,7 @@ Run the fertilizer grading GUI:
 scripts\run_fertilizer_grader_gui.bat
 ```
 
-The grader GUI uses a larger interface with emphasized field labels, bold model-reasoning sections, large bottom grading buttons, and a light/dark theme toggle.
+The grader GUI uses a larger interface with emphasized field labels, bold model-reasoning sections, large bottom grading buttons, larger grading-criteria tooltips, and a light/dark theme toggle.
 
 Regenerate all dataset splits:
 
@@ -77,7 +77,7 @@ Use `project-docs/model-input-instructions.md` to tell a model how to use the sp
 
 Use `project-docs/model-output-instructions.md` when asking a model to return fertilizer recommendations. The instructions define both the required CSV columns and the expected decision-support content for explanation, confidence, uncertainty/caution, and practical notes.
 
-Use `project-docs/cohen-kappa-grading.md` for the human grading rubric. The grader GUI is intended to produce grading CSVs that can be compared between graders for Cohen's kappa calculations.
+Use `project-docs/cohen-kappa-grading.md` for the human grading rubric. The grader GUI uses text labels for recommendation correctness and 1-to-5 numeric ratings for explanation relevance, clarity, uncertainty calibration, and decision-support usefulness. Its grading CSVs can be compared between graders for Cohen's kappa calculations.
 
 Recommended grading outputs belong in `results-grading/`.
 

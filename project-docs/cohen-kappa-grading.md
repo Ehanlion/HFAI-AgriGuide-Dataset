@@ -6,7 +6,7 @@ This document defines the human grading rubric for AgriGuide AI fertilizer recom
 
 It is okay to mix label styles across different rubric categories.
 
-For example, `recommendation_correctness` can use text labels like `correct`, `partially_correct`, and `incorrect`, while `explanation_relevance`, `clarity`, `uncertainty_calibration`, and `decision_support_usefulness` can use a `0-5` scale.
+For example, `recommendation_correctness` can use text labels like `correct`, `partially_correct`, and `incorrect`, while `explanation_relevance`, `clarity`, `uncertainty_calibration`, and `decision_support_usefulness` can use a `1-5` scale.
 
 The important rule is that each individual rubric column must have one fixed set of allowed labels, and both graders must use that same set.
 
@@ -60,7 +60,6 @@ Column name:
 
 Allowed labels:
 
-- `0`
 - `1`
 - `2`
 - `3`
@@ -69,9 +68,8 @@ Allowed labels:
 
 Breakdown:
 
-- `0`: The explanation is missing or unrelated to the given case.
-- `1`: The explanation is mostly generic and barely connects to the input.
-- `2`: The explanation mentions one relevant input, but the reasoning is weak or mostly incomplete.
+- `1`: The explanation is missing, unrelated to the given case, or almost entirely generic.
+- `2`: The explanation barely connects to the input or mentions one relevant input with weak reasoning.
 - `3`: The explanation uses some relevant input values, but misses important factors or does not clearly connect them to the fertilizer.
 - `4`: The explanation uses most important inputs and gives a reasonable fertilizer-specific justification.
 - `5`: The explanation clearly connects the crop, soil, moisture, temperature/humidity, and nutrient levels to the fertilizer recommendation.
@@ -86,7 +84,6 @@ Column name:
 
 Allowed labels:
 
-- `0`
 - `1`
 - `2`
 - `3`
@@ -95,10 +92,9 @@ Allowed labels:
 
 Breakdown:
 
-- `0`: The response is confusing, contradictory, or impossible to use.
-- `1`: The response is very hard to follow and lacks a clear recommendation.
-- `2`: The response has a recommendation, but the wording is vague, cluttered, or poorly organized.
-- `3`: The response is understandable but has some unclear reasoning or unnecessary complexity.
+- `1`: The response is confusing, contradictory, impossible to use, or lacks a clear recommendation.
+- `2`: The response has a recommendation, but it is hard to follow or poorly organized.
+- `3`: The response is understandable but has some unclear reasoning, vague wording, or unnecessary complexity.
 - `4`: The response is clear, organized, and understandable for a non-expert.
 - `5`: The response is very clear, concise, and easy for a non-expert to act on responsibly.
 
@@ -112,7 +108,6 @@ Column name:
 
 Allowed labels:
 
-- `0`
 - `1`
 - `2`
 - `3`
@@ -121,8 +116,7 @@ Allowed labels:
 
 Breakdown:
 
-- `0`: The AI is dangerously overconfident, presents the recommendation as guaranteed, or gives no caution for real-world use.
-- `1`: The AI is strongly overconfident and gives little or no indication that the recommendation should be verified.
+- `1`: The AI is dangerously overconfident, presents the recommendation as guaranteed, or gives little to no caution for real-world use.
 - `2`: The AI gives a recommendation with weak caution, but still sounds more certain than the dataset supports.
 - `3`: The AI gives a usable recommendation and includes some uncertainty or verification language, but the caution is limited or generic.
 - `4`: The AI gives a clear recommendation while appropriately noting that real fertilizer decisions should be verified with soil testing, local expertise, or agronomic guidance.
@@ -138,7 +132,6 @@ Column name:
 
 Allowed labels:
 
-- `0`
 - `1`
 - `2`
 - `3`
@@ -147,8 +140,7 @@ Allowed labels:
 
 Breakdown:
 
-- `0`: The response is unusable or actively misleading.
-- `1`: The response gives very little help and may cause poor decision-making.
+- `1`: The response is unusable, actively misleading, or gives very little help.
 - `2`: The response has one useful piece of information, but major parts are missing or flawed.
 - `3`: The response is somewhat useful, but would still require significant outside interpretation.
 - `4`: The response is useful and would help a human understand the likely fertilizer choice.
@@ -179,9 +171,9 @@ For each calculation:
 
 For the text-label category `recommendation_correctness`, use standard unweighted Cohen's kappa.
 
-For `0-5` scale categories, there are two valid options:
+For `1-5` scale categories, there are two valid options:
 
 - Use unweighted Cohen's kappa if we only care whether the graders selected exactly the same score.
-- Use weighted Cohen's kappa if we want near-agreements to count better than far-apart disagreements, such as `4` vs `5` being less severe than `0` vs `5`.
+- Use weighted Cohen's kappa if we want near-agreements to count better than far-apart disagreements, such as `4` vs `5` being less severe than `1` vs `5`.
 
-For this project, weighted Cohen's kappa is recommended for the `0-5` rubric columns because those scores are ordered.
+For this project, weighted Cohen's kappa is recommended for the `1-5` rubric columns because those scores are ordered.

@@ -61,9 +61,8 @@ RUBRICS = [
         "explanation_relevance",
         "Explanation Relevance",
         [
-            ("0", "The explanation is missing or unrelated to the given case."),
-            ("1", "The explanation is mostly generic and barely connects to the input."),
-            ("2", "The explanation mentions one relevant input, but the reasoning is weak or incomplete."),
+            ("1", "The explanation is missing, unrelated to the given case, or almost entirely generic."),
+            ("2", "The explanation barely connects to the input or mentions one relevant input with weak reasoning."),
             ("3", "The explanation uses some relevant inputs, but misses important factors."),
             ("4", "The explanation uses most important inputs and gives a reasonable fertilizer-specific justification."),
             ("5", "The explanation clearly connects crop, soil, moisture, temperature/humidity, and nutrients to the recommendation."),
@@ -73,10 +72,9 @@ RUBRICS = [
         "clarity",
         "Interpretability and Clarity",
         [
-            ("0", "The response is confusing, contradictory, or impossible to use."),
-            ("1", "The response is very hard to follow and lacks a clear recommendation."),
-            ("2", "The response has a recommendation, but wording is vague, cluttered, or poorly organized."),
-            ("3", "The response is understandable but has some unclear reasoning or unnecessary complexity."),
+            ("1", "The response is confusing, contradictory, impossible to use, or lacks a clear recommendation."),
+            ("2", "The response has a recommendation, but it is hard to follow or poorly organized."),
+            ("3", "The response is understandable but has some unclear reasoning, vague wording, or unnecessary complexity."),
             ("4", "The response is clear, organized, and understandable for a non-expert."),
             ("5", "The response is very clear, concise, and easy for a non-expert to act on responsibly."),
         ],
@@ -85,8 +83,7 @@ RUBRICS = [
         "uncertainty_calibration",
         "Uncertainty Calibration",
         [
-            ("0", "The AI is dangerously overconfident, presents the recommendation as guaranteed, or gives no caution."),
-            ("1", "The AI is strongly overconfident and gives little or no verification language."),
+            ("1", "The AI is dangerously overconfident, presents the recommendation as guaranteed, or gives little to no caution."),
             ("2", "The AI gives weak caution, but still sounds more certain than the dataset supports."),
             ("3", "The AI includes some uncertainty or verification language, but the caution is limited or generic."),
             ("4", "The AI recommends clearly while noting that decisions should be verified with soil testing or expertise."),
@@ -97,8 +94,7 @@ RUBRICS = [
         "decision_support_usefulness",
         "Decision-Support Usefulness",
         [
-            ("0", "The response is unusable or actively misleading."),
-            ("1", "The response gives very little help and may cause poor decision-making."),
+            ("1", "The response is unusable, actively misleading, or gives very little help."),
             ("2", "The response has one useful piece of information, but major parts are missing or flawed."),
             ("3", "The response is somewhat useful, but would require significant outside interpretation."),
             ("4", "The response is useful and would help a human understand the likely fertilizer choice."),
@@ -178,6 +174,16 @@ QLineEdit, QTextEdit, QTableWidget {
 
 QLineEdit {
     min-height: 34px;
+}
+
+QToolTip {
+    background: {panel};
+    border: 2px solid {border};
+    border-radius: 8px;
+    color: {text};
+    font-size: 32px;
+    font-weight: 700;
+    padding: 12px 16px;
 }
 
 QTextEdit {
@@ -297,8 +303,7 @@ def grade_button_stylesheet(label: str) -> str:
         "incorrect": ("#b8332f", "#d64a43", "#84201d", "#ffffff"),
         "partially_correct": ("#d9b33f", "#efcc5c", "#9d7c1c", "#1f241f"),
         "correct": ("#2f6fb3", "#3f82ca", "#1f4f82", "#ffffff"),
-        "0": ("#b8332f", "#d64a43", "#84201d", "#ffffff"),
-        "1": ("#c95832", "#df7048", "#91371c", "#ffffff"),
+        "1": ("#b8332f", "#d64a43", "#84201d", "#ffffff"),
         "2": ("#d98534", "#ee9a4c", "#9a5a1b", "#1f241f"),
         "3": ("#d9b33f", "#efcc5c", "#9d7c1c", "#1f241f"),
         "4": ("#4f9f90", "#61b7a6", "#2d6e63", "#ffffff"),
