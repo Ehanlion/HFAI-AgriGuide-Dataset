@@ -7,9 +7,9 @@ The model test file omits the correct `Fertilizer Name`. Your task is to recomme
 ## Expected Decision-Support Fields
 
 - `explanation`: Explain why the recommended fertilizer fits the specific row. Refer to the actual crop type, soil type, moisture, temperature/humidity, and nitrogen, potassium, and phosphorous values when they matter. Avoid generic fertilizer advice that could apply to any row.
-- `confidence_statement`: State the confidence level in the recommendation in a calibrated way. The statement should reflect that this is a benchmark prediction from limited tabular data, not a guaranteed agronomic prescription.
-- `uncertainty_or_caution`: Identify relevant limits, ambiguity, or real-world checks. Mention that actual fertilizer decisions should be verified with soil testing, local agronomic guidance, crop conditions, or regional recommendations when appropriate.
-- `decision_support_notes`: Add concise practical notes that help a human decision-maker interpret the recommendation responsibly. Focus on usefulness, safety, and avoiding over-trust; do not present the model output as a substitute for expert agricultural advice.
+- `confidence_statement`: State the confidence level in the recommendation in a calibrated way, with a row-specific reason for that confidence level. The statement should reflect that this is a benchmark prediction from limited tabular data, not a guaranteed agronomic prescription.
+- `uncertainty_or_caution`: Identify relevant row-specific limits, ambiguity, or real-world checks. Mention that actual fertilizer decisions should be verified with soil testing, local agronomic guidance, crop conditions, or regional recommendations when appropriate.
+- `decision_support_notes`: Add concise practical notes that help a human decision-maker interpret the recommendation responsibly for that row. Focus on usefulness, safety, and avoiding over-trust; do not present the model output as a substitute for expert agricultural advice.
 
 ## Required Output Filename
 
@@ -44,12 +44,15 @@ Required columns:
 ## Field Rules
 
 - Copy `item_id`, `split_name`, and all input condition fields exactly from the model test file.
+- Set `prompt_version` to the prompt or instruction version used for the run, such as `model-instructions-v2` for outputs produced with the current short model instructions.
 - Do not add `Fertilizer Name`; that is the hidden reference answer.
 - Put your fertilizer recommendation in `model_fertilizer`.
 - Use `explanation` to connect the crop, soil, moisture, temperature/humidity, and nutrient values to the recommendation.
 - Use `confidence_statement` to state how confident the model is.
 - Use `uncertainty_or_caution` to explain limitations and note that real fertilizer decisions should be verified with soil testing, local expertise, or agronomic guidance.
 - Use `decision_support_notes` for concise practical notes that would help a human interpret the recommendation responsibly.
+- Treat every row independently. Do not blindly copy a prior row's narrative fields or repeat identical boilerplate across rows for `confidence_statement`, `uncertainty_or_caution`, or `decision_support_notes`.
+- Before finalizing the CSV, check whether multiple rows reuse the same generic sentence in the narrative fields. If they do, rewrite those fields so they reflect each row's crop, soil, moisture, temperature/humidity, and N/K/P values.
 
 ## Tooling Usages
 
