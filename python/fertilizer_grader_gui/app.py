@@ -285,6 +285,47 @@ def build_stylesheet(theme: dict[str, str]) -> str:
     return stylesheet
 
 
+def ordered_grade_options(column: str, options: list[tuple[str, str]]) -> list[tuple[str, str]]:
+    if column == "recommendation_correctness":
+        order = {"incorrect": 0, "partially_correct": 1, "correct": 2}
+        return sorted(options, key=lambda option: order.get(option[0], len(order)))
+    return options
+
+
+def grade_button_stylesheet(label: str) -> str:
+    colors = {
+        "incorrect": ("#b8332f", "#d64a43", "#84201d", "#ffffff"),
+        "partially_correct": ("#d9b33f", "#efcc5c", "#9d7c1c", "#1f241f"),
+        "correct": ("#2f6fb3", "#3f82ca", "#1f4f82", "#ffffff"),
+        "0": ("#b8332f", "#d64a43", "#84201d", "#ffffff"),
+        "1": ("#c95832", "#df7048", "#91371c", "#ffffff"),
+        "2": ("#d98534", "#ee9a4c", "#9a5a1b", "#1f241f"),
+        "3": ("#d9b33f", "#efcc5c", "#9d7c1c", "#1f241f"),
+        "4": ("#4f9f90", "#61b7a6", "#2d6e63", "#ffffff"),
+        "5": ("#2f6fb3", "#3f82ca", "#1f4f82", "#ffffff"),
+    }
+    background, hover, border, text = colors.get(label, ("#2f6fb3", "#3f82ca", "#1f4f82", "#ffffff"))
+    return f"""
+        QPushButton {{
+            background: {background};
+            border: 2px solid {border};
+            border-radius: 8px;
+            color: {text};
+            font-size: 24px;
+            font-weight: 800;
+            min-height: 76px;
+            min-width: 150px;
+            padding: 16px 24px;
+        }}
+        QPushButton:hover {{
+            background: {hover};
+        }}
+        QPushButton:pressed {{
+            background: {border};
+        }}
+    """
+
+
 def read_csv_rows(path: Path) -> tuple[list[str], list[dict[str, str]]]:
     with path.open(newline="", encoding="utf-8-sig") as csv_file:
         reader = csv.DictReader(csv_file)
@@ -711,9 +752,10 @@ class GraderWindow(QMainWindow):
         column, title, options = RUBRICS[self.current_rubric_index]
         self.prompt_label.setText(f"<b>{title}</b>: choose a grade for <b>{column}</b>.")
         self.button_row.addStretch()
-        for label, tooltip in options:
+        for label, tooltip in ordered_grade_options(column, options):
             button = QPushButton(label)
             button.setProperty("role", "grade")
+            button.setStyleSheet(grade_button_stylesheet(label))
             button.setToolTip(tooltip)
             button.clicked.connect(lambda _checked=False, value=label: self.record_grade(value))
             self.button_row.addWidget(button)
