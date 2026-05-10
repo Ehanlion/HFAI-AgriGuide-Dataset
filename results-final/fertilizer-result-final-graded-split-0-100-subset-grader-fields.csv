@@ -1,0 +1,16 @@
+item_id,grader_ethan_recommendation_correctness,grader_ethan_explanation_relevance,grader_ethan_clarity,grader_ethan_uncertainty_calibration,grader_ethan_decision_support_usefulness,grader_rachel_recommendation_correctness,grader_rachel_explanation_relevance,grader_rachel_clarity,grader_rachel_uncertainty_calibration,grader_rachel_decision_support_usefulness
+FERT-001,correct,5,4,4,5,correct,4,5,3,5
+FERT-002,correct,4,4,4,3,correct,4,4,4,4
+FERT-003,correct,4,4,5,4,correct,5,5,5,5
+FERT-004,partially_correct,5,3,4,5,partially_correct,5,5,5,5
+FERT-025,incorrect,4,4,4,3,partially_correct,5,5,5,5
+FERT-006,correct,5,4,4,3,correct,5,5,5,5
+FERT-069,correct,4,4,5,5,correct,5,4,4,5
+FERT-008,correct,4,4,4,3,correct,4,4,4,5
+FERT-010,correct,5,4,4,5,correct,5,4,5,5
+FERT-015,correct,4,4,3,4,correct,5,5,5,5
+FERT-009,partially_correct,5,4,4,3,partially_correct,4,5,5,5
+FERT-007,incorrect,4,3,3,3,partially_correct,5,4,4,5
+FERT-016,correct,4,4,4,5,correct,5,5,5,5
+FERT-079,correct,4,3,4,5,correct,5,4,5,5
+FERT-020,correct,4,4,4,3,correct,5,4,5,5

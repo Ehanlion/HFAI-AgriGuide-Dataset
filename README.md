@@ -75,6 +75,12 @@ Calculate Cohen's kappa for final CSVs:
 scripts\calculate_final_cohen_kappa.bat
 ```
 
+Extract `item_id` and grader result columns from the final graded subset CSV:
+
+```bat
+scripts\extract_final_grader_fields.bat
+```
+
 ## Dataset Splits
 
 The source dataset is `datasets/fertilizer-prediction-dataset.csv`.
