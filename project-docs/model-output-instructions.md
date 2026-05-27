@@ -44,7 +44,7 @@ Required columns:
 ## Field Rules
 
 - Copy `item_id`, `split_name`, and all input condition fields exactly from the model test file.
-- Set `prompt_version` to the prompt or instruction version used for the run, such as `model-instructions-v2` for outputs produced with the current short model instructions.
+- Set `prompt_version` to the prompt or instruction version used for the run, such as `model-instructions-v3` for outputs produced with the current short model instructions.
 - Do not add `Fertilizer Name`; that is the hidden reference answer.
 - Put your fertilizer recommendation in `model_fertilizer`.
 - Use `explanation` to connect the crop, soil, moisture, temperature/humidity, and nutrient values to the recommendation.

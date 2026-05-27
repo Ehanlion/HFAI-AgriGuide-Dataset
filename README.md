@@ -104,7 +104,7 @@ The split script preserves category coverage for `Crop Type`, `Soil Type`, and `
 
 Use `project-docs/model-input-instructions.md` to tell a model how to use a training split, or how to handle no-training splits that provide only the model-facing test file.
 
-Use `project-docs/model-instructions.md` for the short no-clue prompt context listing allowed fertilizers, crop scope, required output columns, the current `prompt_version`, and row-specific response requirements.
+Use `project-docs/model-instructions.md` for the short no-clue prompt context listing allowed fertilizers, crop scope, required output columns, the current `prompt_version`, and row-specific response requirements. The current instructions require each row to read like an independent recommendation and explicitly prohibit repeated sentence templates across the explanation, confidence, uncertainty/caution, and decision-support fields.
 
 Use `project-docs/model-output-instructions.md` when asking a model to return fertilizer recommendations. The instructions define both the required CSV columns and the expected decision-support content for explanation, confidence, uncertainty/caution, and practical notes. These narrative fields should be specific to each input row and should not reuse generic boilerplate across rows.
 
