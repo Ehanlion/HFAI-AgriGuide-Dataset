@@ -2,7 +2,7 @@
 
 Recommend exactly one fertilizer for each input row.
 
-For new outputs, set `prompt_version` to `model-instructions-v3`.
+For new outputs, set `prompt_version` to `model-instructions-v4`.
 
 Required output filename:
 
@@ -58,25 +58,10 @@ Return CSV only with these columns:
 
 Row-by-row response requirements:
 
-- Treat every input row as a separate recommendation task identified by `item_id`.
-- Write each row as though that row was asked in a separate standalone request, not as one item in a repeated batch.
-- For each row, base the recommendation and all narrative fields on that row's actual crop type, soil type, moisture, temperature/humidity, nitrogen, potassium, and phosphorous values.
-- Do not blindly copy a previous row's answer. Do not use identical boilerplate across rows for `confidence_statement`, `uncertainty_or_caution`, or `decision_support_notes`.
-- Similar rows may have similar reasoning, but each narrative field must still reflect the row's specific values and decision context.
-- `explanation` must give a row-specific fertilizer rationale tied to the actual crop, soil, moisture, temperature/humidity, and N/K/P values when they affect the recommendation.
-- `confidence_statement` must state calibrated confidence and give a row-specific reason why confidence is higher, medium, or lower for that recommendation.
-- `uncertainty_or_caution` must identify a relevant row-specific uncertainty, ambiguity, or validation concern; do not repeat one generic caution sentence for every row.
-- `decision_support_notes` must give concise practical guidance for interpreting that row's recommendation responsibly.
-
-Anti-template narrative requirements:
-
-- Do not use a fixed sentence frame such as "For [crop] grown in [soil]..." for every `explanation`.
-- Do not start every field with the same phrase, even when the fertilizer recommendation repeats.
-- Do not make the four narrative fields differ only by swapping crop, soil, temperature, moisture, or nutrient numbers into the same wording.
-- Vary which evidence leads each answer. Depending on the row, emphasize the dominant nutrient gap, crop sensitivity, soil behavior, moisture level, temperature/humidity context, or why the selected fertilizer is only a practical best fit.
-- When the same fertilizer appears in multiple rows, explain why it fits each row differently instead of reusing the same fertilizer rationale.
-- Use natural, concise prose. The answers should read like independent advisory notes, not generated table text.
-- Before finalizing the CSV, audit the narrative columns for repeated openings, repeated caution language, and repeated decision-support notes. Rewrite any repeated patterns so each row has a distinct row-specific answer.
+- Create one output row for every input row.
+- Treat each input row as its own fertilizer recommendation case identified by `item_id`.
+- Use the input row's crop type, soil type, moisture, temperature/humidity, nitrogen, potassium, and phosphorous values to choose exactly one fertilizer from the allowed list.
+- Fill all required output columns for each row.
 
 Rules:
 - Do not search the internet for the recommended fertilizer.
