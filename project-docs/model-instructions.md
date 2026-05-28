@@ -62,6 +62,7 @@ Return CSV only with these columns:
 - Treat each input row as its own fertilizer recommendation case identified by `item_id` and ensure that you treat each row in isolation to ensure a row-specific response for each row. 
 - Use the input row's crop type, soil type, moisture, temperature/humidity, nitrogen, potassium, and phosphorous values to choose exactly one fertilizer from the allowed list. 
 - Ensure that each requirement is considered in the response and reference what was considered in your outputs to show your work.
+- When generating outputs, do NOT blindly generate the same answer for explanation,confidence_statement,uncertainty_or_caution,decision_support_notes for each row and instead consider that row and evaluate only that row. A valuable output does not simply state a blanket confidence and blanket decision support note for every entry and instead generates a unique output for each row. And outut CAN be similar to a previous row, but only in formatting, copying content from row to row is forbidden.
 - Fill all required output columns for each row.
 
 # Rules:
