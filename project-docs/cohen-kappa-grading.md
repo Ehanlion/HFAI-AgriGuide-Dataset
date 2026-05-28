@@ -30,7 +30,7 @@ Recommended identifier columns:
 
 The fields `item_id`, `split_name`, `model_name`, and `prompt_version` are what let us match Ethan's grade to Rachel's grade for the same response.
 
-`split_name` is required because the same source item can appear in different test sets across evaluations such as `split-80-20`, `split-70-30`, `split-60-40`, `split-0-100`, and `split-0-100-subset`. Grades from different splits should not be paired with each other.
+`split_name` is required because the same source item can appear in different evaluation test sets such as `split-0-100` and `split-0-100-subset`. Grades from different splits should not be paired with each other.
 
 ## Rubric Columns
 

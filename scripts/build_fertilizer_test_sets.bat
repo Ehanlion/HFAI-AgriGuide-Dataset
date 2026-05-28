@@ -12,7 +12,7 @@ if not exist ".venv\Scripts\python.exe" (
     )
 )
 
-".venv\Scripts\python.exe" "python\plot_train_test_category_coverage.py" %*
+".venv\Scripts\python.exe" "python\build_fertilizer_test_sets.py" %*
 set EXIT_CODE=%ERRORLEVEL%
 popd
 

@@ -16,8 +16,6 @@ Final CSV files are written to `results-final/` with this name pattern:
 
 Example:
 
-`results-final/fertilizer-result-final-graded-split-80-20.csv`
-
 `results-final/fertilizer-result-final-graded-split-0-100-subset.csv`
 
 ## Row Shape
@@ -60,10 +58,10 @@ Example columns for grader `ethan`:
 
 If two model result files exist for the same split, and two graders each grade both models, the grader folder can contain four grader CSV files:
 
-- `fertilizer-result-model-a-split-80-20-ethan.csv`
-- `fertilizer-result-model-a-split-80-20-rachel.csv`
-- `fertilizer-result-model-b-split-80-20-ethan.csv`
-- `fertilizer-result-model-b-split-80-20-rachel.csv`
+- `fertilizer-result-model-a-split-0-100-subset-ethan.csv`
+- `fertilizer-result-model-a-split-0-100-subset-rachel.csv`
+- `fertilizer-result-model-b-split-0-100-subset-ethan.csv`
+- `fertilizer-result-model-b-split-0-100-subset-rachel.csv`
 
 The final CSV still has one row per model response. It does not create separate grader columns for each model, because the model identity is already stored on each row in `model_name` and `prompt_version`.
 
@@ -127,8 +125,6 @@ scripts\calculate_final_cohen_kappa.bat
 The script lists available final CSV files and can calculate one file or all files.
 
 Reports are printed to the console and saved to `results-final/` as text files named like:
-
-`cohen-kappa-fertilizer-result-final-graded-split-80-20.txt`
 
 `cohen-kappa-fertilizer-result-final-graded-split-0-100-subset.txt`
 
