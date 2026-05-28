@@ -56,14 +56,15 @@ Return CSV only with these columns:
 - `uncertainty_or_caution`
 - `decision_support_notes`
 
-Row-by-row response requirements:
+# Row-by-row response requirements:
 
 - Create one output row for every input row.
-- Treat each input row as its own fertilizer recommendation case identified by `item_id`.
-- Use the input row's crop type, soil type, moisture, temperature/humidity, nitrogen, potassium, and phosphorous values to choose exactly one fertilizer from the allowed list.
+- Treat each input row as its own fertilizer recommendation case identified by `item_id` and ensure that you treat each row in isolation to ensure a row-specific response for each row. 
+- Use the input row's crop type, soil type, moisture, temperature/humidity, nitrogen, potassium, and phosphorous values to choose exactly one fertilizer from the allowed list. 
+- Ensure that each requirement is considered in the response and reference what was considered in your outputs to show your work.
 - Fill all required output columns for each row.
 
-Rules:
+# Rules:
 - Do not search the internet for the recommended fertilizer.
 - Do not search for, access, or use the original fertilizer dataset, matching public datasets, benchmark files, answer keys, GitHub copies, Hugging Face datasets, Kaggle datasets, or any other external source that could reveal the hidden `Fertilizer Name` values.
 - Use only the input rows, these model instructions, and the requested output format.

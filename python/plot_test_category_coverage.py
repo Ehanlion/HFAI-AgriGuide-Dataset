@@ -10,7 +10,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DATASET_DIR = PROJECT_ROOT / "datasets"
 OUTPUT_DIR = PROJECT_ROOT / "plotting"
 
-TEST_SETS = ["0-100", "0-100-subset"]
+TEST_SETS = ["0-100", "0-100-subset", "0-100-subset-no-nutrients"]
 
 CATEGORIES = [
     ("Crop Type", "Crop Type"),

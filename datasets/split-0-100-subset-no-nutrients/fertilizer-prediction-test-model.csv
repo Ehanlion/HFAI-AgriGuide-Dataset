@@ -1,0 +1,16 @@
+item_id,split_name,Temparature,Humidity ,Moisture,Soil Type,Crop Type,Nitrogen,Potassium,Phosphorous
+FERT-001,split-0-100-subset-no-nutrients,26,52,38,Sandy,Maize,?,?,?
+FERT-002,split-0-100-subset-no-nutrients,29,52,45,Loamy,Sugarcane,?,?,?
+FERT-003,split-0-100-subset-no-nutrients,34,65,62,Black,Cotton,?,?,?
+FERT-004,split-0-100-subset-no-nutrients,32,62,34,Red,Tobacco,?,?,?
+FERT-025,split-0-100-subset-no-nutrients,33,64,39,Clayey,Paddy,?,?,?
+FERT-006,split-0-100-subset-no-nutrients,26,52,35,Sandy,Barley,?,?,?
+FERT-069,split-0-100-subset-no-nutrients,25,50,40,Clayey,Pulses,?,?,?
+FERT-008,split-0-100-subset-no-nutrients,33,64,50,Loamy,Wheat,?,?,?
+FERT-010,split-0-100-subset-no-nutrients,29,58,33,Black,Oil seeds,?,?,?
+FERT-015,split-0-100-subset-no-nutrients,26,52,31,Red,Ground Nuts,?,?,?
+FERT-009,split-0-100-subset-no-nutrients,30,60,42,Sandy,Millets,?,?,?
+FERT-007,split-0-100-subset-no-nutrients,25,50,64,Red,Cotton,?,?,?
+FERT-016,split-0-100-subset-no-nutrients,31,62,49,Black,Sugarcane,?,?,?
+FERT-079,split-0-100-subset-no-nutrients,26,52,36,Clayey,Pulses,?,?,?
+FERT-020,split-0-100-subset-no-nutrients,29,58,52,Loamy,Wheat,?,?,?

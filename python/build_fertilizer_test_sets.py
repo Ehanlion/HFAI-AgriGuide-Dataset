@@ -13,17 +13,25 @@ ITEM_ID_COLUMN = "item_id"
 SPLIT_NAME_COLUMN = "split_name"
 FERTILIZER_COLUMN = "Fertilizer Name"
 CATEGORY_COLUMNS = ["Crop Type", "Soil Type", "Fertilizer Name"]
+NUTRIENT_COLUMNS = ["Nitrogen", "Potassium", "Phosphorous"]
+WITHHELD_VALUE = "?"
 
 
 @dataclass(frozen=True)
 class TestSetSpec:
     name: str
     subset_size: int | None = None
+    withhold_nutrients: bool = False
 
 
 TEST_SETS = {
     "0-100": TestSetSpec("0-100"),
     "0-100-subset": TestSetSpec("0-100-subset", subset_size=15),
+    "0-100-subset-no-nutrients": TestSetSpec(
+        "0-100-subset-no-nutrients",
+        subset_size=15,
+        withhold_nutrients=True,
+    ),
 }
 
 
@@ -40,7 +48,9 @@ def read_dataset() -> tuple[list[str], list[dict[str, str]]]:
             )
 
         missing_columns = [
-            column for column in CATEGORY_COLUMNS if column not in reader.fieldnames
+            column
+            for column in CATEGORY_COLUMNS + NUTRIENT_COLUMNS
+            if column not in reader.fieldnames
         ]
         if missing_columns:
             raise ValueError(f"Missing category columns: {', '.join(missing_columns)}")
@@ -116,6 +126,16 @@ def remove_fertilizer_name(rows: list[dict[str, str]]) -> list[dict[str, str]]:
             fieldname: value
             for fieldname, value in row.items()
             if fieldname != FERTILIZER_COLUMN
+        }
+        for row in rows
+    ]
+
+
+def withhold_nutrients(rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    return [
+        {
+            fieldname: WITHHELD_VALUE if fieldname in NUTRIENT_COLUMNS else value
+            for fieldname, value in row.items()
         }
         for row in rows
     ]
@@ -217,6 +237,8 @@ def write_test_set(
 ) -> None:
     test_rows = select_coverage_subset(rows, spec.subset_size) if spec.subset_size else rows
     test_rows_with_split = add_split_name(test_rows, spec.name)
+    if spec.withhold_nutrients:
+        test_rows_with_split = withhold_nutrients(test_rows_with_split)
     output_dir = test_set_dir(spec.name)
     output_dir.mkdir(parents=True, exist_ok=True)
 

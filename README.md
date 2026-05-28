@@ -5,7 +5,7 @@ This project supports an EE209AS AgriGuide AI workflow for evaluating fertilizer
 ## Project Layout
 
 - `datasets/`: source fertilizer dataset and generated evaluation test sets.
-- `datasets/split-0-100/`, `datasets/split-0-100-subset/`: reference test CSVs and model-facing test CSVs.
+- `datasets/split-0-100/`, `datasets/split-0-100-subset/`, `datasets/split-0-100-subset-no-nutrients/`: reference test CSVs and model-facing test CSVs.
 - `python/`: Python tools for test-set generation, plotting, result merging, and the grader GUI.
 - `python/fertilizer_grader_gui/`: desktop GUI used for human grading.
 - `scripts/`: Windows batch entry points for setup and runnable project tasks.
@@ -59,6 +59,7 @@ Generate test category coverage for specific test sets:
 ```bat
 scripts\generate_test_category_coverage_plot.bat 0-100
 scripts\generate_test_category_coverage_plot.bat split-0-100-subset
+scripts\generate_test_category_coverage_plot.bat split-0-100-subset-no-nutrients
 ```
 
 Merge model results, grader results, and reference answers into final CSVs:
@@ -88,13 +89,15 @@ Evaluation directories contain:
 - `fertilizer-prediction-test.csv`: test data with reference `Fertilizer Name`.
 - `fertilizer-prediction-test-model.csv`: model-facing test data with `Fertilizer Name` removed.
 
-`split-0-100` uses all source rows as test rows. `split-0-100-subset` uses 15 deterministic rows selected to cover every crop type, soil type, and fertilizer label.
+`split-0-100` uses all source rows as test rows. `split-0-100-subset` uses 15 deterministic rows selected to cover every crop type, soil type, and fertilizer label. `split-0-100-subset-no-nutrients` uses the same 15 rows as `split-0-100-subset`, but replaces `Nitrogen`, `Potassium`, and `Phosphorous` values with `?` to test model behavior when nutrient measurements are withheld.
 
 The test-set script adds `split_name`, preserves stable `item_id` values, and makes the reference CSV available only for grading and merging. Give the model the matching `fertilizer-prediction-test-model.csv`; the model writes recommendations; the GUI and merge scripts verify those outputs against `fertilizer-prediction-test.csv`.
 
 ## Model Output and Grading Workflow
 
-Use `project-docs/model-instructions.md` for the short no-clue prompt context listing allowed fertilizers, crop scope, required output columns, the current `prompt_version`, and minimal row-by-row response requirements.
+Use `project-docs/model-instructions.md` for the standard prompt context listing allowed fertilizers, crop scope, required output columns, the current `prompt_version`, and minimal row-by-row response requirements.
+
+Use `project-docs/model-instructions-no-nutrients.md` with `split-0-100-subset-no-nutrients`. These instructions tell the model that nutrient values are withheld as `?`, ask it to preserve those placeholders, and ask it to include both the visible row information and the crop's basic survival needs in the recommendation notes.
 
 Use `project-docs/grading-rubric.md` for the evidence-based human grading rubric. The grader GUI loads the matching rubric options from `python/fertilizer_grader_gui/grading-rubric.json` and uses text labels for recommendation correctness plus 1-to-5 numeric ratings for explanation relevance, clarity, uncertainty calibration, and decision-support usefulness. Its grading CSVs can be compared between graders for Cohen's kappa calculations.
 
@@ -104,7 +107,7 @@ Recommended grading outputs belong in `results-grading/`.
 
 Recommended model outputs belong in `results-model/`.
 
-Use `scripts\merge_final_fertilizer_results.bat` after model outputs and human grading outputs exist for a split. The merge tool only lists splits that have model results, grader results, and reference test data available, such as `split-0-100` and `split-0-100-subset`. It recognizes the filename model id before the split name and grader filename suffixes after the split name, so files such as `fertilizer-result-gpt-5.5-thinking-rev2-split-0-100-subset.csv` and matching grader files are kept separate even if their internal `model_name` column is unchanged. It shows the models and graders found for each split, requires every listed grader to grade every listed model response, then writes final wide-format CSVs to `results-final/` using the name pattern `fertilizer-result-final-graded-split-name.csv`.
+Use `scripts\merge_final_fertilizer_results.bat` after model outputs and human grading outputs exist for a split. The merge tool only lists splits that have model results, grader results, and reference test data available, such as `split-0-100`, `split-0-100-subset`, and `split-0-100-subset-no-nutrients`. It recognizes the filename model id before the split name and grader filename suffixes after the split name, so files such as `fertilizer-result-gpt-5.5-thinking-rev2-split-0-100-subset.csv` and matching grader files are kept separate even if their internal `model_name` column is unchanged. It shows the models and graders found for each split, requires every listed grader to grade every listed model response, then writes final wide-format CSVs to `results-final/` using the name pattern `fertilizer-result-final-graded-split-name.csv`.
 
 Use `scripts\calculate_final_cohen_kappa.bat` after final CSVs exist. The kappa tool prints grader-pair agreement results, includes separate agreement sections for each model in a combined final CSV, and saves matching text reports in `results-final/`.
 
