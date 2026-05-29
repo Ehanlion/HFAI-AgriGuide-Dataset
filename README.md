@@ -2,6 +2,28 @@
 
 This project supports an EE209AS AgriGuide AI workflow for evaluating fertilizer recommendations. It includes the fertilizer dataset, reproducible evaluation test sets, plotting scripts, model instructions, and a PySide6 grading GUI for comparing model recommendations against reference fertilizer labels.
 
+## Pulling the Dataset Submodule
+
+This repository uses `agriguide-final-set/` as a Git submodule for the standalone final dataset repository.
+
+For a fresh clone, pull the project and dataset submodule together:
+
+```bat
+git clone --recurse-submodules <repo-url>
+```
+
+If you already cloned the project, initialize or update the dataset submodule from the repository root:
+
+```bat
+git submodule update --init --recursive
+```
+
+After pulling future parent-repo updates, refresh submodules as needed:
+
+```bat
+git submodule update --recursive --remote
+```
+
 ## Project Layout
 
 - `datasets/`: source fertilizer dataset and generated evaluation test sets.
@@ -26,12 +48,6 @@ scripts\install-deps.bat
 ```
 
 The script creates `.venv` if needed, upgrades `pip`, and installs the packages from `deps\requirements.txt`.
-
-If cloning this repository fresh, initialize the dataset submodule with:
-
-```bat
-git submodule update --init --recursive
-```
 
 ## Common Commands
 
