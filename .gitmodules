@@ -1,0 +1,5 @@
+[submodule "agriguide-final-set"]
+	path = agriguide-final-set
+	url = https://github.com/Ehanlion/HFAI-AgriGuide-Final-Model-Dataset.git
+	branch = main
+	ignore = dirty
