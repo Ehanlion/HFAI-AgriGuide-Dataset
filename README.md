@@ -132,14 +132,11 @@ Recommended grading outputs belong in `results-grading/`.
 
 Recommended model outputs belong in `results-model/`.
 
-Use `scripts\merge_final_fertilizer_results.bat` after model outputs and human grading outputs exist for a split. The merge tool only lists splits that have model results, grader results, and reference test data available, such as `split-0-100`, `split-0-100-subset`, and `split-0-100-subset-no-nutrients`. It recognizes the filename model id before the split name and grader filename suffixes after the split name, so files such as `fertilizer-result-gpt-5.5-thinking-rev2-split-0-100-subset.csv` and matching grader files are kept separate even if their internal `model_name` column is unchanged. It shows the models and graders found for each split, requires every listed grader to grade every listed model response, then writes final wide-format CSVs to `results-final/` using the name pattern `fertilizer-result-final-graded-split-name.csv`.
+Use `scripts\merge_final_fertilizer_results.bat` after model outputs and human grading outputs exist for a split. The merge tool lists splits with model or grader results plus reference test data, such as `split-0-100`, `split-0-100-subset`, and `split-0-100-subset-no-nutrients`. It recognizes the filename model id before the split name and grader filename suffixes after the split name, so files such as `fertilizer-result-gpt-5.5-thinking-rev2-split-0-100-subset.csv` and matching grader files are kept separate even if their internal `model_name` column is unchanged. It shows the models and graders found for each split, reports missing expected grader files such as `results-grading\fertilizer-result-model-id-split-name-grader.csv`, requires every listed grader to grade every listed model response, then writes final wide-format CSVs to `results-final/` using the name pattern `fertilizer-result-final-graded-split-name.csv`.
 
 Use `scripts\calculate_final_cohen_kappa.bat` after final CSVs exist. The kappa tool prints grader-pair agreement results, includes separate agreement sections for each model in a combined final CSV, and saves matching text reports in `results-final/`.
 
-Use `scripts\extract_final_grader_fields.bat` after final CSVs exist to choose
-one final graded CSV, such as `fertilizer-result-final-graded-split-0-100.csv`
-or `fertilizer-result-final-graded-split-0-100-subset.csv`, and write a compact
-grader-fields CSV with `item_id` plus shortened grader rubric columns.
+Use `scripts\extract_final_grader_fields.bat` after final CSVs exist to choose one final graded CSV or all final graded CSVs. The extractor writes one compact grader-fields CSV per model, with `item_id` plus shortened grader rubric columns. Output files use the pattern `fertilizer-result-final-graded-split-name-model-id-grader-fields.csv`. You can pass an output directory as the second argument.
 
 The final CSV format is documented in `project-docs/output-results-format.md`.
 

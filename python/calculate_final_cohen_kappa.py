@@ -11,6 +11,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 FINAL_RESULTS_DIR = PROJECT_ROOT / "results-final"
 FINAL_RESULT_PATTERN = "fertilizer-result-final-graded-split-*.csv"
+GRADER_FIELDS_SUFFIX = "-grader-fields"
 
 RUBRIC_COLUMNS = [
     "recommendation_correctness",
@@ -43,7 +44,11 @@ def read_csv_rows(path: Path) -> tuple[list[str], list[dict[str, str]]]:
 
 
 def discover_final_files() -> list[Path]:
-    return sorted(FINAL_RESULTS_DIR.glob(FINAL_RESULT_PATTERN))
+    return sorted(
+        path
+        for path in FINAL_RESULTS_DIR.glob(FINAL_RESULT_PATTERN)
+        if not path.stem.endswith(GRADER_FIELDS_SUFFIX)
+    )
 
 
 def select_final_files(paths: list[Path]) -> list[Path]:

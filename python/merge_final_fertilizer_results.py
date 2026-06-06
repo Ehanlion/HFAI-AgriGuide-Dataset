@@ -59,10 +59,17 @@ class MergeError(Exception):
 
 
 class SplitSummary:
-    def __init__(self, token: str, models: list[str], graders: list[str]) -> None:
+    def __init__(
+        self,
+        token: str,
+        models: list[str],
+        graders: list[str],
+        missing_grader_files: list[str],
+    ) -> None:
         self.token = token
         self.models = models
         self.graders = graders
+        self.missing_grader_files = missing_grader_files
 
 
 def read_csv_rows(path: Path) -> tuple[list[str], list[dict[str, str]]]:
@@ -170,7 +177,7 @@ def discover_split_tokens() -> list[str]:
         if token:
             reference_tokens.add(token)
 
-    return sorted(model_tokens & grading_tokens & reference_tokens)
+    return sorted((model_tokens | grading_tokens) & reference_tokens)
 
 
 def files_for_split(directory: Path, token: str) -> list[Path]:
@@ -185,6 +192,13 @@ def filename_model_id(path: Path, token: str) -> str | None:
     if not match:
         return None
     return match.group("model").strip() or None
+
+
+def expected_grader_path(model_path: Path, token: str, grader_id: str) -> Path:
+    model_id = filename_model_id(model_path, token)
+    if not model_id:
+        return GRADING_RESULTS_DIR / f"{model_path.stem}-{grader_id}.csv"
+    return GRADING_RESULTS_DIR / f"fertilizer-result-{model_id}-split-{token}-{grader_id}.csv"
 
 
 def reference_path_for_split(token: str) -> Path:
@@ -212,24 +226,57 @@ def model_summary_label(path: Path, token: str, row: dict[str, str]) -> str:
 
 
 def summarize_split(token: str) -> SplitSummary:
+    model_paths = files_for_split(MODEL_RESULTS_DIR, token)
+    grading_paths = files_for_split(GRADING_RESULTS_DIR, token)
+
     models: set[str] = set()
-    for path in files_for_split(MODEL_RESULTS_DIR, token):
+    model_ids_by_path: dict[Path, str] = {}
+    for path in model_paths:
         fieldnames, rows = read_csv_rows(path)
         require_columns(path, fieldnames, MODEL_REQUIRED_COLUMNS)
         validate_single_split(path, rows, split_name(token))
+        model_ids_by_path[path] = filename_model_id(path, token) or model_label(rows[0])
         models.update(model_summary_label(path, token, row) for row in rows)
 
     graders: set[str] = set()
-    for path in files_for_split(GRADING_RESULTS_DIR, token):
+    graded_pairs: set[tuple[str, str]] = set()
+    for path in grading_paths:
         fieldnames, rows = read_csv_rows(path)
         require_columns(path, fieldnames, GRADER_REQUIRED_COLUMNS)
         validate_single_split(path, rows, split_name(token))
-        graders.update(row.get(GRADER_ID_COLUMN, "").strip() for row in rows)
+        path_model_id = filename_model_id(path, token)
+        for row in rows:
+            grader_id = row.get(GRADER_ID_COLUMN, "").strip()
+            model_id = path_model_id or model_label(row)
+            if grader_id:
+                graders.add(grader_id)
+                graded_pairs.add((model_id, grader_id))
+
+    missing_grader_files: list[str] = []
+    if model_paths and not grading_paths:
+        missing_grader_files.append(
+            f"No grader result CSVs found in {GRADING_RESULTS_DIR.relative_to(PROJECT_ROOT)} "
+            f"for {split_name(token)}."
+        )
+    elif graders:
+        for model_path, model_id in sorted(model_ids_by_path.items()):
+            for grader_id in sorted(grader for grader in graders if grader):
+                if (model_id, grader_id) not in graded_pairs:
+                    missing_grader_files.append(
+                        str(
+                            expected_grader_path(
+                                model_path,
+                                token,
+                                grader_id,
+                            ).relative_to(PROJECT_ROOT)
+                        )
+                    )
 
     return SplitSummary(
         token=token,
         models=sorted(model for model in models if model),
         graders=sorted(grader for grader in graders if grader),
+        missing_grader_files=missing_grader_files,
     )
 
 
@@ -250,6 +297,10 @@ def select_splits(summaries: list[SplitSummary]) -> list[str]:
         print(f"{index}. {split_name(summary.token)}")
         print(f"   Models: {', '.join(summary.models) if summary.models else 'none'}")
         print(f"   Graders: {', '.join(summary.graders) if summary.graders else 'none'}")
+        if summary.missing_grader_files:
+            print("   Missing expected grader files:")
+            for missing_path in summary.missing_grader_files:
+                print(f"     {missing_path}")
     all_option = len(summaries) + 1
     print(f"{all_option}. All splits")
 
@@ -322,9 +373,10 @@ def load_grades(token: str) -> dict[tuple[str, str, str], dict[str, dict[str, st
         fieldnames, rows = read_csv_rows(path)
         require_columns(path, fieldnames, GRADER_REQUIRED_COLUMNS)
         validate_single_split(path, rows, split_name(token))
+        path_model_id = filename_model_id(path, token)
         for source_row in rows:
             row = dict(source_row)
-            row[RESULT_MODEL_ID_COLUMN] = model_identity(path, token, row)
+            row[RESULT_MODEL_ID_COLUMN] = path_model_id or model_identity(path, token, row)
             grader_id = row.get(GRADER_ID_COLUMN, "").strip()
             if not grader_id:
                 raise MergeError(f"{path} contains a row with blank grader_id.")
@@ -336,7 +388,6 @@ def load_grades(token: str) -> dict[tuple[str, str, str], dict[str, dict[str, st
 
 
 def merge_split(token: str) -> Path:
-    expected_split = split_name(token)
     references = load_references(token)
     model_fields, model_rows = load_models(token)
     grades_by_key = load_grades(token)
@@ -344,7 +395,12 @@ def merge_split(token: str) -> Path:
     model_keys = {row_key(row) for row in model_rows}
     unmatched_grade_keys = sorted(key for key in grades_by_key if key not in model_keys)
     if unmatched_grade_keys:
-        raise MergeError(f"Grader rows do not match model results, including {unmatched_grade_keys[0]}.")
+        raise MergeError(
+            "Grader rows do not match model results. "
+            f"First unmatched row key: {unmatched_grade_keys[0]}. "
+            "Check that each grading filename uses the same model id as its model CSV, "
+            "for example fertilizer-result-<model-id>-split-<split-name>-<grader-id>.csv."
+        )
 
     grader_ids = sorted({grader_id for grades in grades_by_key.values() for grader_id in grades})
     missing_grade_sets = [
@@ -355,9 +411,24 @@ def merge_split(token: str) -> Path:
     ]
     if missing_grade_sets:
         missing_key, missing_grader = missing_grade_sets[0]
+        model_path_by_id: dict[str, Path] = {}
+        for model_path in files_for_split(MODEL_RESULTS_DIR, token):
+            fieldnames, file_rows = read_csv_rows(model_path)
+            require_columns(model_path, fieldnames, MODEL_REQUIRED_COLUMNS)
+            if file_rows:
+                model_path_by_id[model_identity(model_path, token, file_rows[0])] = model_path
+        expected_path = expected_grader_path(
+            model_path_by_id.get(
+                missing_key[2],
+                MODEL_RESULTS_DIR / f"fertilizer-result-{missing_key[2]}-split-{token}.csv",
+            ),
+            token,
+            missing_grader,
+        )
         raise MergeError(
             f"Cannot merge incomplete grading results. Grader {missing_grader} is missing "
-            f"a grade for row key {missing_key}."
+            f"a grade for row key {missing_key}. Expected grading file: "
+            f"{expected_path.relative_to(PROJECT_ROOT)}"
         )
 
     grader_fields = [

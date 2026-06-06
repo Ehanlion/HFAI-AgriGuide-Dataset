@@ -6,7 +6,7 @@ The final combined result files are created by:
 scripts\merge_final_fertilizer_results.bat
 ```
 
-The script lists only complete dataset splits that can be generated from the available files. A split is complete when it has at least one model result CSV, at least one grader result CSV, and the matching reference test CSV. The menu also shows the models and graders found for each split. The script can create one split file or all complete split files.
+The script lists dataset splits that have model or grader result CSVs plus the matching reference test CSV. The menu shows the models and graders found for each split and reports missing expected grader files when a model has not been graded by every listed grader. The script can create one split file or all listed split files, but incomplete grading coverage fails with the first missing row key and the expected grading filename.
 
 ## Output Location
 
@@ -112,7 +112,7 @@ For a selected split, the merge tool requires:
 
 The tool prints a clear error if any required input is missing, if a file contains rows from the wrong split, if rows cannot be matched, or if any grader is missing grades for a model response in the selected split.
 
-Splits that do not have all required input categories are not shown in the selection menu.
+Splits without reference test data are not shown in the selection menu. Splits that have model results but no grader results are shown with a missing-grader message, then fail if selected until the expected grading CSVs are added.
 
 ## Cohen's Kappa Reports
 
@@ -137,3 +137,17 @@ When a final CSV contains multiple models, the kappa report includes:
 - When present, `result_model_id` is used in the section label so filename-level model versions remain visible.
 
 This means a final CSV containing two models and two graders will produce distinct Cohen's kappa scores for each model's graded responses, plus an overall score across both models.
+
+## Grader Field Extraction
+
+Compact grader-field CSVs are created by:
+
+```bat
+scripts\extract_final_grader_fields.bat
+```
+
+The extractor lists full final result CSVs and excludes previously extracted `*-grader-fields.csv` files. It can process one final CSV or all final CSVs. For each input, it writes one compact CSV per model using this pattern:
+
+`fertilizer-result-final-graded-split-name-model-id-grader-fields.csv`
+
+Each extracted CSV contains only rows for that model and includes `item_id` plus shortened grader rubric columns, such as `ethan_correctness`, `ethan_explanation`, and `rachel_support`.
