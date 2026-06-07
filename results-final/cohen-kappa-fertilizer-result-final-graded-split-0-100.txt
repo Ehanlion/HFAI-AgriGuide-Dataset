@@ -2,13 +2,22 @@ Cohen's kappa report for fertilizer-result-final-graded-split-0-100.csv
 Graders: ethan, rachel
 
 Overall agreement across all models
+Rows: 198
+ethan vs rachel
+  recommendation_correctness: 1.0000 (unweighted, n=198)
+  explanation_relevance: 0.9599 (linear weighted, n=198)
+  clarity: 0.9238 (linear weighted, n=198)
+  uncertainty_calibration: 0.6877 (linear weighted, n=198)
+  decision_support_usefulness: 0.9333 (linear weighted, n=198)
+
+Agreement for model: gemini-pro (gemini / model-instructions-v4)
 Rows: 99
 ethan vs rachel
   recommendation_correctness: 1.0000 (unweighted, n=99)
-  explanation_relevance: 0.9598 (linear weighted, n=99)
-  clarity: 0.3529 (linear weighted, n=99)
-  uncertainty_calibration: 0.1990 (linear weighted, n=99)
-  decision_support_usefulness: 1.0000 (linear weighted, n=99)
+  explanation_relevance: 0.9038 (linear weighted, n=99)
+  clarity: 0.9047 (linear weighted, n=99)
+  uncertainty_calibration: 0.8335 (linear weighted, n=99)
+  decision_support_usefulness: 0.2116 (linear weighted, n=99)
 
 Agreement for model: gpt-5.5 (gpt-5.5 / model-instructions-v4)
 Rows: 99
