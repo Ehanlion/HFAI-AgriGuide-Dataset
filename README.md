@@ -32,7 +32,7 @@ git submodule update --recursive --remote
 - `python/fertilizer_grader_gui/`: desktop GUI used for human grading.
 - `scripts/`: Windows batch entry points for setup and runnable project tasks.
 - `project-docs/`: grading rubrics, model instructions, dataset notes, and proposal material.
-- `agriguide-final-set/`: Git submodule for the standalone final dataset repository, including the final dataset README and copied grading rubric.
+- `agriguide-final-set/`: Git submodule for the standalone final dataset repository, including Gemini and GPT final graded results, the final dataset README, and copied grading rubric.
 - `plotting/`: generated charts for dataset distribution and test-set coverage.
 - `results-model/`: model output CSVs for each evaluated split.
 - `results-grading/`: intended output location for grader result CSVs.
